@@ -16,14 +16,52 @@ function print_content() {
 
 
 	//csun*
-
+	ob_start();
+	
+	print_header('CSUN')
+	print_pages($csun)
+	print_footer();
+	
+	$content = ob_get_contents();
+	$f = fopen($file_names[0].'.xhtml', "w");
+	fwrite($f, $content);
+	fclose($f);
+	
 	//undergrad_progs*
-
-	//undergrad_degree_list*
+	ob_start();
+	
+	print_header('Undergraduate Programs')
+	print_ugp($undergrad_progs)
+	print_footer();
+	
+	$content = ob_get_contents();
+	$f = fopen($file_names[1].'.xhtml', "w");
+	fwrite($f, $content);
+	fclose($f);
 
 	//student_services*
+	ob_start();
+	
+	print_header('Student Services')
+	print_pages($student_services)
+	print_footer();
+	
+	$content = ob_get_contents();
+	$f = fopen($file_names[2].'.xhtml', "w");
+	fwrite($f, $content);
+	fclose($f);
 
 	//special_programs*
+	ob_start();
+	
+	print_header('Special Programs')
+	print_pages($special_programs)
+	print_footer();
+	
+	$content = ob_get_contents();
+	$f = fopen($file_names[3].'.xhtml', "w");
+	fwrite($f, $content);
+	fclose($f);
 
 	//general education*
 		//info*
@@ -44,5 +82,24 @@ function print_content() {
 	
 	return $file_names;
 }
+
+function print_header($title){ ?>
+<?xml version='1.0' encoding='utf-8'?>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+		<title>
+			<?php echo $title; ?>
+		</title>
+	</head>
+	<body>
+	<h1><?php echo $title; ?></h1>
+<?php }
+
+function print_footer() { ?>
+
+	</body>
+</html>
+<?php }
 
 	
