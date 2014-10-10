@@ -214,6 +214,7 @@ function contentOPF($contents, $options) {
 			<dc:rights><?php echo $options['rights']; ?></dc:rights>
 			<dc:publisher><?php echo $options['publisher']; ?></dc:publisher>
 			<dc:identifier id="BookID" opf:scheme="UUID"><?php echo $options['bookid']; ?></dc:identifier>
+			<meta name="cover" content="cover-image"/> <!-- this is wrong! -->
 		</metadata>
 		<manifest>
 			<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml" />
@@ -228,7 +229,7 @@ function contentOPF($contents, $options) {
 			<?php endforeach; endif; ?>
 		<?php endforeach; ?>
 			
-			<item id="imgl" href="images/sample.png" media-type="image/png" /><!-- Update this sometime -->
+			<item id="cover-image" href="images/cover.png" media-type="image/png" /><!-- Update this sometime -->
 		</manifest>
 		<spine toc="ncx">
 		<?php foreach($contents as $section) : ?>

@@ -29,7 +29,8 @@ function print_content($content) {
 		//Cover
 		if($type === 'cover')
 		{
-			print_header($title);
+			print_header($title, false);
+			cover();
 			print_footer();
 		}
 		//Table of Contents
@@ -181,6 +182,13 @@ function print_footer() { ?>
 	</body>
 </html>
 <?php }
+
+function cover() {?>
+	<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+	  width="100%" height="100%" viewBox="0 0 573 800" preserveAspectRatio="xMidYMid meet">
+	 <image width="600" height="800" xlink:href="./images/cover.png" />
+ </svg>
+<?php}
 
 function print_pages($pages, $class = '') {
 
