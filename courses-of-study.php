@@ -3,11 +3,91 @@
 //get all the departments we want
 //if a college get college page
 
-function courses_of_study() {
-	$terms = get_terms('general_education');
-	//sort by description
-	//get the "bad" parents/categories
-	//if it's a college
+function courses_of_study($content) {
+	$colleges = array('cecs', 'hhd', 'coh', 'educ', 'amc', 'csbs');
+	$dir = './book/OEBPS/';
+	
+	$filename = strtolower(sanitize_file_name($title));
+	$filenames[0] = array(
+			'title' => $content['listTitle'],
+			'file' => $filename
+		);
+	
+	//Programs of Study
+	foreach($content['categories'] as $slug => $id)
+	{
+		ob_start();
+		
+		if(in_array($slug, $colleges))
+		{
+			$page = get_posts(array('name' => $slug, 'post_type' => 'page'));
+			$title = $page[0]->post_title;
+			
+			print_header($title, false);
+			print_college($page[0]);
+			print_footer();
+		}
+		elseif($slug === 'univ')
+		{
+			$deptterm = get_term_by( 'slug', $slug, 'department_shortname' );
+			$title = $deptterm->description;
+			
+			print_header($title);
+			echo '<h2>Office of Undergraduate Studies</h2>';
+			print_courses('univ');
+			print_footer();
+		}
+		else
+		{
+			$deptterm = get_term_by( 'slug', $slug, 'department_shortname' );
+			$title = $deptterm->description;
+			
+			print_header($title, false);
+			get_course_of_study($deptterm);
+			print_footer();
+		}
+				
+		$output = ob_get_contents();		//save output
+		ob_end_clean();						//discard buffer
+		
+		$filename = strtolower(sanitize_file_name($title));
+		$filenames[] = array(
+					'title' =>$title, 
+					'file' => $filename
+				);
+		
+		$f = fopen($dir.$filename.'.xhtml', "w");
+		fwrite($f, $ouput);
+		fclose($f);
+	}
+	
+	//Course Policies
+	if(isset($content['policies']) && $content['policies']) {
+		$title = 'Course Policies';
+		ob_start();
+		
+		print_header($title);
+		course_policies();
+		print_footer();
+		
+		$output = ob_get_contents();		//save output
+		ob_end_clean();						//discard buffer
+		
+		$filename = strtolower(sanitize_file_name($title));
+		$filenames[] = array(
+					'title' =>$title, 
+					'file' => $filename
+				);
+		
+		$f = fopen($dir.$filenames[$title].'.xhtml', "w");
+		fwrite($f, $ouput);
+		fclose($f);
+	}
+	
+	//Table of Contents
+	table_of_contents($filenames, 0);		//make this
+	
+	return $filenames
 }
 
 //get course policies
@@ -28,29 +108,30 @@ function course_policies() {
 	echo '</div>';
 }
 
-function print_college($college_slug)
+function print_college($college)
 {
-	$college = get_posts(array('name' => $college_slug, 'post_type' => 'page'));
-	$id = $college[0]->ID;
+	$id = $college->ID;
 	//college title
-	echo $college[0]->post_title;
+	echo '<h1>'.$college->post_title.'</h1>';
 	//college contact
 	the_field('contact', $id);
 	//college program list
-	print_program_list($college_slug)
+	print_program_list($college->name);
 	//college content
-	echo $college[0]->post_content;
+	echo $college->post_content;
 	//college courses
 	$values = get_field('college_courses', $id);
-	if ( $values != false) :
+	if($college->name === 'csm')
+	{
+		print_courses('sci');
+	}
+	elseif ( $values != false) :
 		echo '<h2>Courses</h2>';
 		the_field('college_courses', $id);
 	endif; 
 }
 
 function get_course_of_study($deptterm) {
-
-	$deptterm = get_term_by( 'slug', $dept, 'department_shortname' );
 	$dept = $deptterm->slug;
 
 	$title = $deptterm->description;
@@ -60,15 +141,20 @@ function get_course_of_study($deptterm) {
 ?>
 	<div class = "main course-of-study">
 		<h1><?php echo $title; ?></h1>
-		<h2><?php echo $college; ?></h2>
+		<?php if($dept !== 'bus')
+			echo '<h2>'.$college.'</h2>';
 		
-<?php 
 		print_contact($dept);
-		print_dept_faculty($dept);
-		print_dept_emeriti($dept);
+		
+		if($dept !== 'bus') 
+		{
+			print_dept_faculty($dept);
+			print_dept_emeriti($dept);
+		}
+		
 		print_program_list($dept);
 		print_department($dept);
-		print_prograns($dept);
+		print_programs($dept);
 		print_courses($dept); 
 ?>
 	</div>
@@ -87,7 +173,7 @@ function print_courses($dept) {
 		
 	if($query_course->have_posts()) : ?>
 		<div class="courses course-of-study">
-		
+		<h3>Courses</h3>
 		<?php while($query_course->have_posts()) : $query_course->the_post();
 			echo '<h4>'.get_the_title().'</h4>';
 			the_content();
