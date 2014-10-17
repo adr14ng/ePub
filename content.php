@@ -16,7 +16,7 @@ function print_content($content) {
 
 	$dir = './book/OEBPS/';
 
-	foreach($conent as $type => $section){
+	foreach($content as $type => $section){
 		$title = $section['title'];
 		$filename = strtolower(sanitize_file_name($title));
 		$file_names[] = array(
@@ -42,7 +42,7 @@ function print_content($content) {
 		//Undergraduate Programs
 		else if($type === 'undergrad')
 		{
-			print_header($title)
+			print_header($title);
 			
 			if(isset($section['pages']))
 				print_pages($section['pages'], $filename);
@@ -58,7 +58,7 @@ function print_content($content) {
 		//General Education
 		else if($type === 'gened')
 		{
-			print_header($title)
+			print_header($title);
 			
 			if(isset($section['pages']))
 				print_pages($section['pages'], $filename);
@@ -70,14 +70,14 @@ function print_content($content) {
 				upper_division();
 			
 			if(isset($section['ic']) && $section['ic'])
-				if_competence();
+				info_competence();
 				
 			print_footer();
 		}
 		//Graduate Studies
 		else if($type === 'grad')
 		{
-			print_header($title)
+			print_header($title);
 			
 			if(isset($section['pages']))
 				print_pages($section['pages'], $filename);
@@ -90,7 +90,7 @@ function print_content($content) {
 		//Credential
 		else if($type === 'credential')
 		{
-			print_header($title)
+			print_header($title);
 			
 			if(isset($section['pages']))
 				print_pages($section['pages'], $filename);
@@ -106,13 +106,13 @@ function print_content($content) {
 			$index = count($file_names) - 1;
 			$file_names[$index]['subpages'] = courses_of_study($section);
 			
-			print_header($title)
+			print_header($title);
 			print_footer();
 		}
 		//Policies
 		else if($type === 'policies')
 		{
-			print_header($title)
+			print_header($title);
 			
 			if(isset($section['categories']))
 				print_policies($section['categories']);
@@ -122,7 +122,7 @@ function print_content($content) {
 		//Faculty
 		else if($type === 'faculty')
 		{
-			print_header($title)
+			print_header($title);
 			
 			print_faculty();
 			
@@ -131,7 +131,7 @@ function print_content($content) {
 		//Emeriti
 		else if($type === 'emeriti')
 		{
-			print_header($title)
+			print_header($title);
 			
 			print_emeriti();
 			
@@ -140,7 +140,7 @@ function print_content($content) {
 		//Non Special Requests
 		else 
 		{
-			print_header($title)
+			print_header($title);
 			
 			if(isset($section['pages']))
 				print_pages($section['pages'], $filename);
@@ -163,19 +163,22 @@ function print_content($content) {
 	return $file_names;
 }
 
-function print_header($title, $h1 = true){ ?>
-<?xml version='1.0' encoding='utf-8'?>
+function print_header($title, $h1 = true){ 
+echo '<?xml version="1.0" encoding="utf-8"?>'."\n";
+?>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+		<link rel="stylesheet" type="text/css" href="style.css" />
 		<title>
 			<?php echo $title; ?>
 		</title>
 	</head>
 	<body>
-	<?php if($h1) ?>
+	<?php if($h1) : ?>
 		<h1><?php echo $title; ?></h1>
-<?php }
+	<?php endif;
+}
 
 function print_footer() { ?>
 
@@ -183,27 +186,29 @@ function print_footer() { ?>
 </html>
 <?php }
 
-function cover() {?>
+function cover() {
+echo <<<COV
 	<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-	  width="100%" height="100%" viewBox="0 0 573 800" preserveAspectRatio="xMidYMid meet">
-	 <image width="600" height="800" xlink:href="./images/cover.png" />
- </svg>
-<?php}
+		  width="100%" height="100%" viewBox="0 0 573 800" preserveAspectRatio="xMidYMid meet">
+		 <image width="600" height="800" xlink:href="./images/cover.png" />
+	</svg>
+COV;
+}
 
 function print_pages($pages, $class = '') {
-
+	
 	if(!empty($pages) && !is_array($pages))
 		$pages = (array)$pages;
 	
 	if(is_array($pages)){
-		foreach($pages as $page_slug){
-			$page = get_posts(array('name' => $page_slug, 'post_type' => 'page'));
-			
+		foreach($pages as $page_id){
+			$page = get_post($page_id);
+
 			if($page)
 			{
-				echo '<div class="'.$class.' page">'
-				echo '<h2>'.$page[0]->title.'</h2>';
-				echo $page[0]->post_content;
+				echo '<div class="'.$class.' page">';
+				echo '<h2>'.$page->post_title.'</h2>';
+				echo apply_filters('the_content', $page->post_content);
 				echo '</div>';
 			}
 		
@@ -223,8 +228,10 @@ function print_pages($pages, $class = '') {
 	ob_start();
 	print_header($file_names[$toc_index]['title']);
 	
-	foreach($file_names as $link) : 
+	foreach($file_names as $link)
+	{
 		echo '<p><a href="'.$link['file'].'.xhtml">'.$link['title'].'</a></p>';
+	}
 	
 	print_footer();
 	
@@ -245,7 +252,7 @@ function print_faculty() {
 	$query_faculty = new WP_Query(array(
 		'orderby' => 'title', 
 		'order' => 'ASC',
-		'post_type' => 'faculty'
+		'post_type' => 'faculty',
 		'department_shortname' => '-emeriti',
 		'posts_per_page' => 1000,));
 		
@@ -270,7 +277,7 @@ function print_emeriti() {
 	$query_faculty = new WP_Query(array(
 		'orderby' => 'title', 
 		'order' => 'ASC',
-		'post_type' => 'faculty'
+		'post_type' => 'faculty',
 		'department_shortname' => 'emeriti',
 		'posts_per_page' => 1000,));
 	
@@ -298,7 +305,7 @@ function print_policies($terms) { ?>
 		<h1>Policies and Procedures</h1>
 <?php 
 		foreach($terms as $id) {
-			$term = get_term($id, 'policy_categories')			
+			$term = get_term($id, 'policy_categories');			
 			$query_policies = new WP_Query(array(
 				'post_type' => 'policies', 
 				'orderby' => 'title', 
@@ -331,7 +338,7 @@ function print_grad_program_list() { ?>
 	<div class="grad-studies grad-programs">
 	<h2>Graduate Degree Programs List</h2>
 <?php 
-	query_programs = new WP_Query(array(
+	$query_programs = new WP_Query(array(
 		'orderby' => 'title', 
 		'order' => 'ASC',  
 		'degree_level' => 'master,doctorate',
@@ -356,7 +363,7 @@ function print_certificate_list() { ?>
 	<div class="grad-studies grad-programs">
 	<h2>Post-Baccalaureate University Certificate Program List</h2>
 <?php 
-	query_programs = new WP_Query(array(
+	$query_programs = new WP_Query(array(
 		'orderby' => 'title', 
 		'order' => 'ASC',  
 		'degree_level' => 'certificate',
@@ -521,6 +528,7 @@ function degree_list() {
 	if($query_programs->have_posts()) : ?>
 		<div class="program-list undergrad">
 		<h2> Undergraduate Degree Program List</h2>
+		<p>
 		<?php while($query_programs->have_posts()) : $query_programs->the_post();
 			$degree = get_field('degree_type');
 			$program_title = get_the_title();
@@ -531,6 +539,7 @@ function degree_list() {
 			if(isset($post_option)&&$post_option!=='')
 				echo ' - '.$post_option;
 		endwhile; ?>
+		</p>
 		</div>
 	<?php endif;
 }

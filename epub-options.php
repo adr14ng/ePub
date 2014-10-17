@@ -27,7 +27,7 @@
 			'EPUB Creation',
 			'EPUB Creation',
 			'manage_options',
-			'epub-create'
+			'epub-create',
 			array($this, 'epub_page')
 		);
 	}

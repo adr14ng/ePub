@@ -8,13 +8,8 @@
  */
 
 	defined('ABSPATH') or die("No script kiddies please!");		//security
-
+	
 	$plug_in_dir = dirname(__FILE__);
-
-	//Load the plugin
-	require_once $plug_in_dir . '/file-structure.php';
-	require_once $plug_in_dir . '/courses-of-study.php';
-	require_once $plug_in_dir . '/content.php';
 
 	//Add settings page
 	require_once $plug_in_dir . '/epub-options.php';

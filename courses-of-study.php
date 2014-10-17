@@ -4,10 +4,10 @@
 //if a college get college page
 
 function courses_of_study($content) {
-	$colleges = array('cecs', 'hhd', 'coh', 'educ', 'amc', 'csbs');
+	$colleges = array('cecs', 'hhd', 'coh', 'educ', 'amc', 'csbs', 'csm');
 	$dir = './book/OEBPS/';
 	
-	$filename = strtolower(sanitize_file_name($title));
+	$filename = strtolower(sanitize_file_name($content['listTitle']));
 	$filenames[0] = array(
 			'title' => $content['listTitle'],
 			'file' => $filename
@@ -57,7 +57,7 @@ function courses_of_study($content) {
 				);
 		
 		$f = fopen($dir.$filename.'.xhtml', "w");
-		fwrite($f, $ouput);
+		fwrite($f, $output);
 		fclose($f);
 	}
 	
@@ -79,15 +79,15 @@ function courses_of_study($content) {
 					'file' => $filename
 				);
 		
-		$f = fopen($dir.$filenames[$title].'.xhtml', "w");
-		fwrite($f, $ouput);
+		$f = fopen($dir.$filename.'.xhtml', "w");
+		fwrite($f, $output);
 		fclose($f);
 	}
 	
 	//Table of Contents
 	table_of_contents($filenames, 0);		//make this
 	
-	return $filenames
+	return $filenames;
 }
 
 //get course policies
@@ -95,14 +95,14 @@ function course_policies() {
 	$policies = array('course-numbering-system', 'online-course-designations', 
 		'course-types', 'course-requisites-definition-of-terms');
 	
-	echo '<div class="policies course-of-study">'
+	echo '<div class="policies course-of-study">';
 	foreach($policies as $policy_slug) {
 		$policy = get_posts(array('name' => $policy_slug, 'post_type' => 'policies'));
 		
 		if($policy)
 		{
 			echo '<h3>'.$policy[0]->title.'</h3>';
-			echo $policy[0]->post_content;
+			echo apply_filters('the_content', $policy[0]->post_content);
 		}
 	}
 	echo '</div>';
@@ -111,24 +111,28 @@ function course_policies() {
 function print_college($college)
 {
 	$id = $college->ID;
+	global $post;
+
 	//college title
 	echo '<h1>'.$college->post_title.'</h1>';
 	//college contact
-	the_field('contact', $id);
+	echo apply_filters('the_content', get_field('contact', $id));
 	//college program list
-	print_program_list($college->name);
+	echo $college->name;
+	print_program_list($college->post_name);
 	//college content
-	echo $college->post_content;
+	echo apply_filters('the_content', $college->post_content);
 	//college courses
 	$values = get_field('college_courses', $id);
-	if($college->name === 'csm')
+	if($college->post_name === 'csm')
 	{
 		print_courses('sci');
 	}
-	elseif ( $values != false) :
+	elseif ( $values != false)
+	{
 		echo '<h2>Courses</h2>';
-		the_field('college_courses', $id);
-	endif; 
+		echo apply_filters('the_content', get_field('college_courses', $id));
+	} 
 }
 
 function get_course_of_study($deptterm) {
@@ -176,7 +180,7 @@ function print_courses($dept) {
 		<h3>Courses</h3>
 		<?php while($query_course->have_posts()) : $query_course->the_post();
 			echo '<h4>'.get_the_title().'</h4>';
-			the_content();
+			echo apply_filters('the_content', get_the_content());
 		endwhile; ?>
 		</div>
 	<?php endif;
@@ -212,12 +216,12 @@ function print_programs($dept) {
 
 function print_program() { ?>
 	<div class="program course-of-study">
-		<h3><?php echo get_program_name(); ?></h3>
+		<h2><?php echo get_program_name(); ?></h2>
 							
 		<?php $post_option=get_field('option_title');
 
 		if(isset($post_option)&&$post_option!=='') 
-			echo '<h4>'.$post_option.'</h4>';
+			echo '<h3 class="subtitle">'.$post_option.'</h3>';
 
 		echo '<h3>Overview</h3>';
 		the_content();
@@ -225,16 +229,16 @@ function print_program() { ?>
 		$values = get_field('slos');
 		if ( $values != false) { 
 			echo '<h3>Student Learning Outcomes</h3>';
-			the_field('slos');
+			echo apply_filters('the_content', get_field('slos'));
 		} 
 		
 		$values = get_field('program_requirements');
 		if ( $values != false) {
 			echo '<h3>Requirements</h3>';
-			the_field('program_requirements');
+			echo apply_filters('the_content', get_field('program_requirements'));
 		}
 							
-	echo '</div>'
+	echo '</div>';
 }
 
 function print_program_list($dept) { ?>
@@ -256,11 +260,17 @@ function print_program_list($dept) { ?>
 			if($query_programs->have_posts()) {
 			
 				if($level === 'major')
+				{
 						echo '<h4>Undergraduate</h4> ';
+				}
 				elseif($level === 'master')
+				{
 					echo '<h4>Graduate</h4> ';
-				elseif( ($level = 'credential' && !$authorizations) || $level = 'certificate')
-						echo '<h4>'.ucwords($level).'</h4> ';
+				}
+				elseif( ($level === 'credential' && !$authorizations) || $level === 'certificate')
+				{
+					echo '<h4>'.ucwords($level).'</h4> ';
+				}
 				
 				while($query_programs->have_posts()) { $query_programs->the_post();
 					$degree = get_field('degree_type');
@@ -317,7 +327,7 @@ function print_department($dept) {
 	$query_department = new WP_Query(array(
 		'orderby' => 'title', 
 		'order' => 'ASC',
-		'post_type' => 'departments'
+		'post_type' => 'departments',
 		'department_shortname' => $dept,
 		'posts_per_page' => 1000,));
 		
@@ -331,37 +341,37 @@ function print_department($dept) {
 		<?php $values = get_field('mission_statement');
 		if ( $values != false) : ?>
 			<h3>Mission Statement</h3>
-			<?php the_field('mission_statement'); ?>
+			<?php echo apply_filters('the_content', get_field('mission_statement')); ?>
 		<?php endif; ?>
 		
 		<?php $values = get_field('academic_advisement');
 		if ( $values != false) : ?>
 			<h3>Academic Advisement</h3>
-			<?php the_field('academic_advisement'); ?>
+			<?php echo apply_filters('the_content', get_field('academic_advisement')); ?>
 		<?php endif; ?>
 				
 		<?php $values = get_field('careers');
 		if ( $values != false) : ?>
 			<h3>Careers</h3>
-			<?php the_field('careers'); ?>
+			<?php echo apply_filters('the_content', get_field('careers')); ?>
 		<?php endif; ?>
 				
 		<?php $values = get_field('accreditation');
 		if ( $values != false) : ?>
 			<h3>Accreditation</h3>
-			<?php the_field('accreditation'); ?>
+			<?php echo apply_filters('the_content', get_field('accreditation')); ?>
 		<?php endif; ?>
 				
 			<?php $values = get_field('honors');
 		if ( $values != false) : ?>
 			<h3>Honors</h3>
-			<?php the_field('honors'); ?>
+			<?php echo apply_filters('the_content', get_field('honors')); ?>
 		<?php endif; ?>
 				
 		<?php $values = get_field('student_orgs');
 		if ( $values != false) : ?>
 			<h3>Clubs and Societies</h3>
-			<?php the_field('student_orgs'); ?>
+			<?php echo apply_filters('the_content', get_field('student_orgs')); ?>
 		<?php endif; ?>
 			
 		<?php the_content(); ?>
@@ -375,20 +385,26 @@ function print_dept_faculty($dept) {
 	$query_faculty = new WP_Query(array(
 		'orderby' => 'title', 
 		'order' => 'ASC',
-		'post_type' => 'faculty'
-		'department_shortname' => $dept.',-emeriti',
+		'post_type' => 'faculty',
+		'department_shortname' => $dept,		//root out emeriti
 		'posts_per_page' => 1000,));
 		
-		
+	$post_counter = 0;	
 	if($query_faculty->have_posts()): ?>
 		<div class="faculty course-of-study">
 			<h3>Faculty</h3>
 			
 			<?php while ($query_faculty->have_posts()) { 
 				$query_faculty->the_post();
+				$post_counter++;
 				
-				the_title();
-				if( $post_counter != count( $posts ) ) 
+				$name = get_the_title();
+				$names = explode(", ", $name);
+				$name = $names[1]." ".$names[0];
+				
+				echo $name;
+				
+				if( $post_counter < $query_faculty->post_count ) 
 					echo ', ';
 			} ?>
 			
@@ -400,18 +416,25 @@ function print_dept_emeriti($dept) {
 	$query_faculty = new WP_Query(array(
 		'orderby' => 'title', 
 		'order' => 'ASC',
-		'post_type' => 'faculty'
+		'post_type' => 'faculty',
 		'department_shortname' => 'emeriti+'.$dept,
 		'posts_per_page' => 1000,));
 	
-	
+	$post_counter = 0;
 	if($query_faculty->have_posts()): ?>
 		<div class="emeriti course-of-study">
 			<h3>Emeritus Faculty</h3>
 			<?php while ($query_faculty->have_posts()) {
 				$query_faculty->the_post();
-				the_title();
-				if( $post_counter != count( $posts ) ) 
+				$post_counter++;
+				
+				$name = get_the_title();
+				$names = explode(", ", $name);
+				$name = $names[1]." ".$names[0];
+				
+				echo $name;
+				
+				if( $post_counter < $query_faculty->post_count ) 
 					echo ', ';
 			} ?>
 		</div>
@@ -422,14 +445,14 @@ function print_contact($dept) {
 	$query_department = new WP_Query(array(
 		'orderby' => 'title', 
 		'order' => 'ASC',
-		'post_type' => 'departments'
+		'post_type' => 'departments',
 		'department_shortname' => $dept,
 		'posts_per_page' => 1));
 
 	if($query_department->have_posts()): $query_department->the_post(); ?>
 	
 		<div class="contact course-of-study">
-			<?php the_field('contact'); ?>
+			<?php echo apply_filters('the_content', get_field('contact')); ?>
 		</div>
 
 <?php endif;

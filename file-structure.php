@@ -17,8 +17,8 @@ function create_book($content, $options) {
 function contentOPF($contents, $options) {
 	$dir = './book/OEBPS/';
 	ob_start();
+	echo  '<?xml version="1.0" encoding="UTF-8"?>'."\n";
 ?>
-	<?xml version="1.0" encoding="UTF-8"??>
 	<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="BookID" version="2.0" >
 		<metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
 			<dc:title><?php echo $options['title']; ?></dc:title>
@@ -36,7 +36,7 @@ function contentOPF($contents, $options) {
 		<?php foreach($contents as $section) : ?>
 			<item id="<?php echo $section['file']; ?>" href="<?php echo $section['file']; ?>.xhtml" media-type="application/xhtml+xml" />
 			
-			<?php if($section['subpages']): foreach($section['subpages'] as $subsection) : ?>
+			<?php if(isset($section['subpages'])): foreach($section['subpages'] as $subsection) : ?>
 				<item id="<?php echo $subsection['file']; ?>" href="<?php echo $subsection['file']; ?>.xhtml" media-type="application/xhtml+xml" />
 			<?php endforeach; endif; ?>
 		<?php endforeach; ?>
@@ -47,7 +47,7 @@ function contentOPF($contents, $options) {
 		<?php foreach($contents as $section) : ?>
 			<itemref idref="<?php echo $section['file']; ?>" />
 			
-			<?php if($section['subpages']): foreach($section['subpages'] as $subsection): ?>
+			<?php if(isset($section['subpages'])): foreach($section['subpages'] as $subsection): ?>
 				<itemref idref="<?php echo $subsection['file']; ?>" />
 			<?php endforeach; endif; ?>
 			
@@ -74,8 +74,8 @@ function mimetype() {
 function container() {
 	$dir = './book/META-INF/';
 	ob_start();
+	echo '<?xml version="1.0"?>'."\n";
 ?>
-	<?xml version="1.0"?>
 	<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
 		<rootfiles>
 			<rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>
@@ -94,9 +94,8 @@ function tocNCX($contents, $options) {
 	$dir = './book/OEBPS/';
 	$count = 0;
 	ob_start();
-
+	echo '<?xml version="1.0" encoding="UTF-8"?>'."\n";
 ?>
-	<?xml version="1.0" encoding="UTF-8"?>
 	<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
 
 		<head>
@@ -117,7 +116,7 @@ function tocNCX($contents, $options) {
 				<navLabel><text><?php echo $section['title']; ?></text></navLabel>
 				<content src="<?php echo $section['file']; ?>.xhtml"/>
 				
-				<?php if(issest($section['subpages'])): foreach($section['subpages'] as $subsection):
+				<?php if(isset($section['subpages'])): foreach($section['subpages'] as $subsection):
 					$count++; ?>
 					<navPoint id="<?php echo $subsection['file']; ?>" playOrder="<?php echo $count; ?>">
 						<navLabel><text><?php echo $subsection['title']; ?></text></navLabel>

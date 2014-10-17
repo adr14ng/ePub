@@ -1,15 +1,21 @@
 <?php
 
-if(isset($_POST['action']) && $_POST['action'] === "epub-creation")
+print_r($_POST);
+
+//epub->plugs->wp-content->base
+$base_url = dirname(dirname(dirname(dirname(__FILE__))));
+require_once($base_url.'/wp-admin/admin.php');
+
+if(isset($_POST['action']) && $_POST['action'] == 'epub-creation')
 {
-	check_admin_referer('epub-creation');
+	//check_admin_referer('epub-creation');
 	
 	$plug_in_dir = dirname(__FILE__);
 
 	//Add content filtering
 	add_filter('the_content', 'filter_tags');
-	add_filter('acf/format_value/type=wp_wysiwyg', 'filter_acf_tags', 10, 3);
-	add_filter('acf/format_value/type=wysiwyg', 'filter_acf_tags', 10, 3);
+	add_filter('acf/format_value_for_api/type=wp_wysiwyg', 'filter_acf_tags', 10, 3);
+	add_filter('acf/format_value_for_api/type=wysiwyg', 'filter_acf_tags', 10, 3);
 	
 	//Load the plugin
 	require_once $plug_in_dir . '/file-structure.php';
@@ -18,19 +24,32 @@ if(isset($_POST['action']) && $_POST['action'] === "epub-creation")
 	
 	list($content, $df_options) = default_values();
 	
-	$options = array_intersect_key($_POST, $df_options);
-	array_merge($df_options, $options);
+	if(isset($_POST['default']))
+	{
+		set_time_limit(300);
+		create_book($content, $df_options);
+	}
+	else
+	{
+		/*$options = array_intersect_key($_POST, $df_options);
+		array_merge($df_options, $options);
+		
+		create_book($content, $options);*/
+	}
 	
-	create_book($content, $options);
-
+	/*
 	//Redirect back to page
 	if(isset($_POST['return']))
 		wp_redirect( $_POST['return'] );
 	else
 		wp_redirect( admin_url() );
+	
+	*/
 }
-		
+
+
 function default_values() {
+	
 	$content = array(
 		'cover' => array( 'title' => 'Univeristy Catalog'),
 		'toc' => array('title' => "Table of Contents"),
@@ -147,7 +166,7 @@ function default_values() {
 							'hist' 	=> 64,
 							'humsex'=> 428,
 							'coh' 	=> 429,	//college
-							'huma' 	=> 489
+							'huma' 	=> 489,
 							'js' 	=> 94,
 							'jour' 	=> 95,
 							'kin' 	=> 105,
@@ -202,7 +221,7 @@ function default_values() {
 		'faculty' => array('title' => 'Faculty and Administration'),
 		'emeriti'  => array('title' => "Emeriti"),
 	);
-		
+	
 	$options = array(
 		'title' => 'CSUN Catalog',
 		'creator' => 'Undergraduate Studies',
@@ -217,22 +236,26 @@ function default_values() {
 
 function filter_tags($content)
 {
+	//remove space things
+	$content = preg_replace('/&nbsp;/i', '', $content);
+
 	//remove span tags
-	$content = preg_replace('/<(\s)*(/)*(span)[^>]*>/i', '', $content);
+	$content = preg_replace('/<\s*\/*(span)[^>]*>/i', '', $content);
 	
 	//remove style attributes
-	$content = preg_replace('/style=(('.*?')|(".*?"))/i', '', $content);
+	$content = preg_replace('/style=((\'.*?\')|(".*?"))/i', '', $content);
+	
+	//remove iFrame and it's content
+	$content = preg_replace('/<iframe (.)*<\/iframe>/i', '', $content);
 	
 	//remove internal links
-	$content = preg_replace('/<\s*a[^>]*href="http:\/\/www.csun.edu\/catalog[^>]*>(.*?)<\s*/a>/i', $1, $content);
+	$content = preg_replace('/<\s*a[^>]*href="http:\/\/www.csun.edu\/catalog[^>]*>([\s\S]*?)<\s*\/a>/i', '$1', $content);
 	
 	return $content;
 }
 
 function filter_acf_tags($value, $post_id, $field)
 {
-	if()	//field's we don't want to filter
-		return $value;
-	else
-		return filter_tags($value);
+	$value = apply_filters('the_content',$value);
+	return $value;
 }
