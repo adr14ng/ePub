@@ -6,6 +6,11 @@ if(isset($_POST['action']) && $_POST['action'] === "epub-creation")
 	
 	$plug_in_dir = dirname(__FILE__);
 
+	//Add content filtering
+	add_filter('the_content', 'filter_tags');
+	add_filter('acf/format_value/type=wp_wysiwyg', 'filter_acf_tags', 10, 3);
+	add_filter('acf/format_value/type=wysiwyg', 'filter_acf_tags', 10, 3);
+	
 	//Load the plugin
 	require_once $plug_in_dir . '/file-structure.php';
 	require_once $plug_in_dir . '/courses-of-study.php';
@@ -208,4 +213,26 @@ function default_values() {
 	);
 		
 	return array($content, $options);
+}
+
+function filter_tags($content)
+{
+	//remove span tags
+	$content = preg_replace('/<(\s)*(/)*(span)[^>]*>/i', '', $content);
+	
+	//remove style attributes
+	$content = preg_replace('/style=(('.*?')|(".*?"))/i', '', $content);
+	
+	//remove internal links
+	$content = preg_replace('/<\s*a[^>]*href="http:\/\/www.csun.edu\/catalog[^>]*>(.*?)<\s*/a>/i', $1, $content);
+	
+	return $content;
+}
+
+function filter_acf_tags($value, $post_id, $field)
+{
+	if()	//field's we don't want to filter
+		return $value;
+	else
+		return filter_tags($value);
 }
