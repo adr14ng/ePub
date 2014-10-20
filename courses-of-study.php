@@ -130,7 +130,7 @@ function print_college($college)
 	}
 	elseif ( $values != false)
 	{
-		echo '<h2>Courses</h2>';
+		echo '<h3>Course List</h3>';
 		echo apply_filters('the_content', get_field('college_courses', $id));
 	} 
 }
@@ -140,7 +140,7 @@ function get_course_of_study($deptterm) {
 
 	$title = $deptterm->description;
 
-	$collegeterm = get_term($deptterm->parent, get_query_var('department_shortname') );
+	$collegeterm = get_term($deptterm->parent, 'department_shortname');
 	$college = $collegeterm->description;
 ?>
 	<div class = "main course-of-study">
@@ -177,7 +177,7 @@ function print_courses($dept) {
 		
 	if($query_course->have_posts()) : ?>
 		<div class="courses course-of-study">
-		<h3>Courses</h3>
+		<h3>Course List</h3>
 		<?php while($query_course->have_posts()) : $query_course->the_post();
 			echo '<h4>'.get_the_title().'</h4>';
 			echo apply_filters('the_content', get_the_content());
@@ -365,7 +365,7 @@ function print_department($dept) {
 			<?php $values = get_field('honors');
 		if ( $values != false) : ?>
 			<h3>Honors</h3>
-			<?php echo apply_filters('the_content', get_field('honors')); ?>
+			<?php echo lower_headings(apply_filters('the_content', get_field('honors')), 3); ?>
 		<?php endif; ?>
 				
 		<?php $values = get_field('student_orgs');

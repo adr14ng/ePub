@@ -242,6 +242,9 @@ function filter_tags($content)
 	//remove span tags
 	$content = preg_replace('/<\s*\/*(span)[^>]*>/i', '', $content);
 	
+	//change list-style to class
+	$content = preg_replace('/style=[\'|"]list-style-type:([^;]*);[\'|"]/i', 'class="$1"', $content);
+	
 	//remove style attributes
 	$content = preg_replace('/style=((\'.*?\')|(".*?"))/i', '', $content);
 	
@@ -258,4 +261,31 @@ function filter_acf_tags($value, $post_id, $field)
 {
 	$value = apply_filters('the_content',$value);
 	return $value;
+}
+
+function lower_headings($content, $level)
+{
+	$heading = h.$level;
+	
+	while(strpos($content, $heading) !== FALSE) : 
+		//remove h6
+		$content = preg_replace('/(<\s*\/*)(h6)([^>]*>)/i', '$1p$3', $content);
+		//move down h5
+		$content = preg_replace('/(<\s*\/*)(h5)([^>]*>)/i', '$1h6$3', $content);
+		//move down h4
+		$content = preg_replace('/(<\s*\/*)(h4)([^>]*>)/i', '$1h5$3', $content);
+		//move down h3
+		$content = preg_replace('/(<\s*\/*)(h3)([^>]*>)/i', '$1h4$3', $content);
+		//move down h2
+		$content = preg_replace('/(<\s*\/*)(h2)([^>]*>)/i', '$1h3$3', $content);
+		//move down h1
+		$content = preg_replace('/(<\s*\/*)(h1)([^>]*>)/i', '$1h2$3', $content);
+	endwhile;
+
+	return $content;
+}
+
+function clear_double_headings($content){
+	$content = preg_replace('/<[^>]*extra-header[^>]*>[\s\S]*?<[^>]*>/i', '', $content);
+	return $content;
 }

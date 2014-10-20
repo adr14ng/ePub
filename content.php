@@ -195,8 +195,7 @@ echo <<<COV
 COV;
 }
 
-function print_pages($pages, $class = '') {
-	
+function print_pages($pages, $base_class = '') {	
 	if(!empty($pages) && !is_array($pages))
 		$pages = (array)$pages;
 	
@@ -206,9 +205,19 @@ function print_pages($pages, $class = '') {
 
 			if($page)
 			{
+				$content = $page->post_content;
+				$content = apply_filters('the_content', $content);
+				$content = clear_double_headings($content);
+				if(count($pages) > 1) {
+					$content = lower_headings($content, 2);
+				}
+				
+				$class = $base_class.' '.$page->post_name;
+				
 				echo '<div class="'.$class.' page">';
-				echo '<h2>'.$page->post_title.'</h2>';
-				echo apply_filters('the_content', $page->post_content);
+				if((count($pages) > 1)&&($page->post_name !== 'general-education'))
+					echo '<h2>'.$page->post_title.'</h2>';
+				echo $content;
 				echo '</div>';
 			}
 		
@@ -259,7 +268,6 @@ function print_faculty() {
 		
 	if($query_faculty->have_posts()): ?>
 		<div class="faculty">
-			<h1>Faculty and Administration</h1>
 			
 			<?php while ($query_faculty->have_posts()) { 
 				$query_faculty->the_post();
@@ -284,7 +292,6 @@ function print_emeriti() {
 	
 	if($query_faculty->have_posts()): ?>
 		<div class="emeriti faculty">
-			<h1>Emeritus Faculty</h1>
 			<?php while ($query_faculty->have_posts()) {
 				$query_faculty->the_post();
 				echo '<h2>'.get_the_title().'</h2>';
@@ -302,7 +309,6 @@ function print_emeriti() {
 function print_policies($terms) { ?>
 	
 	<div class="policies">
-		<h1>Policies and Procedures</h1>
 <?php 
 		foreach($terms as $id) {
 			$term = get_term($id, 'policy_categories');			
@@ -528,9 +534,9 @@ function degree_list() {
 	if($query_programs->have_posts()) : ?>
 		<div class="program-list undergrad">
 		<h2> Undergraduate Degree Program List</h2>
+		<?php while($query_programs->have_posts()) : $query_programs->the_post(); ?>
 		<p>
-		<?php while($query_programs->have_posts()) : $query_programs->the_post();
-			$degree = get_field('degree_type');
+<?php			$degree = get_field('degree_type');
 			$program_title = get_the_title();
 			$post_option=get_field('option_title');
 			
@@ -538,8 +544,9 @@ function degree_list() {
 			
 			if(isset($post_option)&&$post_option!=='')
 				echo ' - '.$post_option;
-		endwhile; ?>
+?>
 		</p>
+		<?php endwhile; ?>
 		</div>
 	<?php endif;
 }
