@@ -15,11 +15,12 @@
 function print_content($content) {
 
 	$dir = './book/OEBPS/';
+	$index = 0;
 
 	foreach($content as $type => $section){
 		$title = $section['title'];
-		$filename = strtolower(sanitize_file_name($title));
-		$file_names[] = array(
+		$filename = strtolower(sanitize_key($title));
+		$file_names[$index] = array(
 					'title' =>$title, 
 					'file' => $filename
 				);
@@ -37,7 +38,7 @@ function print_content($content) {
 		else if($type === 'toc')
 		{
 			//wait til the end to do this
-			$toc_index = count($file_names) - 1;
+			$toc_index = $index;
 		}
 		//Undergraduate Programs
 		else if($type === 'undergrad')
@@ -45,13 +46,19 @@ function print_content($content) {
 			print_header($title);
 			
 			if(isset($section['pages']))
-				print_pages($section['pages'], $filename);
+			{
+				$file_names[$index]['sublinks'] = print_pages($section['pages'], $filename);
+			}
 				
 			if(isset($section['policies']) && $section['policies'])
-				undergrad_policies();
+			{
+				$file_names[$index]['sublinks'][] = undergrad_policies();
+			}
 				
 			if(isset($section['proglist']) && $section['proglist'])
-				degree_list();
+			{
+				$file_names[$index]['sublinks'][] = degree_list();
+			}
 			
 			print_footer();
 		}
@@ -61,16 +68,24 @@ function print_content($content) {
 			print_header($title);
 			
 			if(isset($section['pages']))
-				print_pages($section['pages'], $filename);
+			{
+				$file_names[$index]['sublinks'] = print_pages($section['pages'], $filename);
+			}
 				
 			if(isset($section['category']) && $section['category'])
-				categories();
+			{
+				$file_names[$index]['sublinks'][] = categories();
+			}
 			
 			if(isset($section['upper']) && $section['upper'])
-				upper_division();
+			{
+				$file_names[$index]['sublinks'][] = upper_division();
+			}
 			
 			if(isset($section['ic']) && $section['ic'])
-				info_competence();
+			{
+				$file_names[$index]['sublinks'][] = info_competence();
+			}
 				
 			print_footer();
 		}
@@ -79,11 +94,20 @@ function print_content($content) {
 		{
 			print_header($title);
 			
-			if(isset($section['pages']))
-				print_pages($section['pages'], $filename);
+			if(isset($section['pages'])) 
+			{
+				$file_names[$index]['sublinks'] = print_graduate_page($section['pages']);
+			}
 				
 			if(isset($section['proglist']) && $section['proglist'])
-				print_grad_program_list();
+			{
+				$file_names[$index]['sublinks'][] = print_grad_program_list();
+			}
+			
+			if(isset($section['certlist']) && $section['certlist'])
+			{
+				$file_names[$index]['sublinks'][] = print_certificate_list($section['certlist']);
+			}
 			
 			print_footer();
 		}
@@ -93,17 +117,15 @@ function print_content($content) {
 			print_header($title);
 			
 			if(isset($section['pages']))
-				print_pages($section['pages'], $filename);
-				
-			if(isset($section['proglist']) && $section['proglist'])
-				print_certificate_list();
+			{
+				$file_names[$index]['sublinks'] = print_pages($section['pages'], $filename);
+			}
 				
 			print_footer();
 		}
 		//Courses of Study
 		else if($type === 'study')
 		{
-			$index = count($file_names) - 1;
 			$file_names[$index]['subpages'] = courses_of_study($section);
 			
 			print_header($title);
@@ -115,7 +137,9 @@ function print_content($content) {
 			print_header($title);
 			
 			if(isset($section['categories']))
-				print_policies($section['categories']);
+			{
+				$file_names[$index]['sublinks'] = print_policies($section['categories']);
+			}
 			
 			print_footer();
 		}
@@ -124,7 +148,7 @@ function print_content($content) {
 		{
 			print_header($title);
 			
-			print_faculty();
+			$file_names[$index]['sublinks'] = print_faculty();
 			
 			print_footer();
 		}
@@ -133,7 +157,7 @@ function print_content($content) {
 		{
 			print_header($title);
 			
-			print_emeriti();
+			$file_names[$index]['sublinks'] = print_emeriti();
 			
 			print_footer();
 		}
@@ -143,7 +167,7 @@ function print_content($content) {
 			print_header($title);
 			
 			if(isset($section['pages']))
-				print_pages($section['pages'], $filename);
+				$file_names[$index]['sublinks'] = print_pages($section['pages'], $filename);
 				
 			print_footer();
 		}
@@ -154,11 +178,13 @@ function print_content($content) {
 		$f = fopen($dir.$filename.'.xhtml', "w");
 		fwrite($f, $content);
 		fclose($f);
+		
+		$index++;
 	}
 	
 	//add table of contents
 	if(isset($toc_index))
-		table_of_contents($file_names, $toc_index);
+		table_of_contents($file_names, $toc_index, true);
 	
 	return $file_names;
 }
@@ -189,8 +215,8 @@ function print_footer() { ?>
 function cover() {
 echo <<<COV
 	<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-		  width="100%" height="100%" viewBox="0 0 573 800" preserveAspectRatio="xMidYMid meet">
-		 <image width="600" height="800" xlink:href="./images/cover.png" />
+		width="100%" height="100%" viewBox="0 0 573 800" preserveAspectRatio="xMidYMid meet">
+		<image width="600" height="800" xlink:href="./images/cover.png" />
 	</svg>
 COV;
 }
@@ -210,11 +236,17 @@ function print_pages($pages, $base_class = '') {
 				$content = clear_double_headings($content);
 				if(count($pages) > 1) {
 					$content = lower_headings($content, 2);
+					$sublinks[] = array('title' => $page->post_title, 'file' => $page->post_name);
+				}
+				else
+				{
+					$content = add_ids($content);
+					$sublinks = get_sublinks($content);
 				}
 				
 				$class = $base_class.' '.$page->post_name;
 				
-				echo '<div class="'.$class.' page">';
+				echo '<div id="'.$page->post_name.'" class="'.$class.' page">';
 				if((count($pages) > 1)&&($page->post_name !== 'general-education'))
 					echo '<h2>'.$page->post_title.'</h2>';
 				echo $content;
@@ -223,6 +255,8 @@ function print_pages($pages, $base_class = '') {
 		
 		}
 	}
+	
+	return $sublinks;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -231,17 +265,33 @@ function print_pages($pages, $base_class = '') {
  
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
- function table_of_contents($file_names, $toc_index) {
+ function table_of_contents($file_names, $toc_index, $sublinks) {
 	$dir = './book/OEBPS/';
 	
-	ob_start();
-	print_header($file_names[$toc_index]['title']);
+	ob_start(); 
+	print_header($file_names[$toc_index]['title'], false); ?>
 	
-	foreach($file_names as $link)
-	{
-		echo '<p><a href="'.$link['file'].'.xhtml">'.$link['title'].'</a></p>';
-	}
-	
+		<h1><?php echo $file_names[$toc_index]['title']; ?></h1>
+		<ol class="toc">
+<?php
+		foreach($file_names as $key => $link) :
+			if($key !== $toc_index) :
+				echo '<li><a href="'.$link['file'].'.xhtml">'.$link['title'].'</a></li>';
+				
+				if($sublinks && isset($link['sublinks']) && 
+					!(strpos($link['title'], 'aculty') || strpos($link['title'], 'meriti'))) :
+					echo '<li><ol class="toc sublink">';
+					foreach($link['sublinks'] as $sublink) :
+						echo '<li><a href="'.$link['file'].'.xhtml#'.$sublink['file'].'">'.$sublink['title'].'</a></li>';
+					endforeach;
+					echo '</ol></li>';
+				endif;
+				
+			endif;
+		endforeach
+?>
+		</ol>
+<?php	
 	print_footer();
 	
 	$content = ob_get_contents();		//save output
@@ -258,12 +308,13 @@ function print_pages($pages, $base_class = '') {
  
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 function print_faculty() {
+	global $post;
+	
 	$query_faculty = new WP_Query(array(
 		'orderby' => 'title', 
 		'order' => 'ASC',
 		'post_type' => 'faculty',
-		'department_shortname' => '-emeriti',
-		'posts_per_page' => 1000,));
+		'posts_per_page' => 10000,));
 		
 		
 	if($query_faculty->have_posts()): ?>
@@ -272,16 +323,23 @@ function print_faculty() {
 			<?php while ($query_faculty->have_posts()) { 
 				$query_faculty->the_post();
 				
-				echo '<h2>'.get_the_title().'</h2>';
-				the_content();
+				if( strpos(get_the_term_list(  $post->ID, 'department_shortname', '', ', '), 'Emeriti') === FALSE):
+					echo '<h2 id="'.$post->post_name.'">'.get_the_title().'</h2>';
+					the_content();
+					$sublinks[] = array('title' => $post->post_title, 'file' => $post->post_name);
+				endif;
 				
 			} ?>
 			
 		</div>
-	<?php endif; 
+	<?php endif;
+	
+	return $sublinks;
 }
 
 function print_emeriti() {
+	global $post;
+	
 	$query_faculty = new WP_Query(array(
 		'orderby' => 'title', 
 		'order' => 'ASC',
@@ -294,11 +352,15 @@ function print_emeriti() {
 		<div class="emeriti faculty">
 			<?php while ($query_faculty->have_posts()) {
 				$query_faculty->the_post();
-				echo '<h2>'.get_the_title().'</h2>';
+				echo '<h2 id="'.$post->post_name.'">'.get_the_title().'</h2>';
 				the_content();
+				
+				$sublinks[] = array('title' => $post->post_title, 'file' => $post->post_name);
 			} ?>
 		</div>
 	<?php endif;
+	
+	return $sublinks;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -306,11 +368,14 @@ function print_emeriti() {
  * Policy Methods
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-function print_policies($terms) { ?>
+function print_policies($terms) { 
+	global $post;
+	?>
 	
 	<div class="policies">
 <?php 
 		foreach($terms as $id) {
+			$subsublinks = array();
 			$term = get_term($id, 'policy_categories');			
 			$query_policies = new WP_Query(array(
 				'post_type' => 'policies', 
@@ -321,18 +386,29 @@ function print_policies($terms) { ?>
 								
 			if($query_policies->have_posts()) 
 			{
-				echo '<h2>' . $term->name .'</h2>';
+				echo '<h2 id="'.$term->slug.'">' . $term->name .'</h2>';
 				while($query_policies->have_posts())
 				{ 
 					$query_policies->the_post();
-					echo '<h3>'.get_the_title().'</h3>';
-					the_content();
+					echo '<h3 id="'.$term->slug.'-'.$post->post_name.'">'.get_the_title().'</h3>';
+					
+					$content = get_the_content();
+					$content = apply_filters('the_content', $content);
+					$content = lower_headings($content, 3);
+					
+					echo $content;
+					
+					$subsublinks[] = array('title' => $post->post_title, 'file' => $term->slug.'-'.$post->post_name);
 				}
+				
+				$sublinks[] = array('title' => $term->name, 'file' => $term->slug, 'sublinks' => $subsublinks);
 			}
 		}
 ?>
 	</div>
 <?php
+
+	return $sublinks;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -340,9 +416,70 @@ function print_policies($terms) { ?>
  * Graduate Studies Methods
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-function print_grad_program_list() { ?>
+ 
+ function print_graduate_page($page_id) {	
+
+	$page = get_post($page_id);
+
+	if($page)
+	{
+		$content = $page->post_content;
+		$content = apply_filters('the_content', $content);
+		$content = add_ids($content);
+		$sublinks = get_sublinks($content);
+		list($policy_content, $policy_links) = grad_policies();
+		
+		foreach($sublinks as $key => $link) {
+			if(isset($link['file']) && $link['file'] === 'grad-policies') {
+				$sublinks[$key]['sublinks'] = $policy_links;
+				break;
+			}
+		}
+		
+		$content = preg_replace('/(<div id="policies"[^>]*>)([\s\S]*?)(<\/div>)/i', '$1'.$policy_content.'$3', $content);
+				
+		$class = 'graduate-studies '.$page->post_name;
+				
+		echo '<div id="'.$page->post_name.'" class="'.$class.' page">';
+		echo $content;
+		echo '</div>';
+
+	}
+	
+	return $sublinks;
+}
+ 
+ function grad_policies(){
+	global $post;
+	
+	$query_policies = new WP_Query(array(
+		'orderby' => 'name', 
+		'order' => 'ASC',  
+		'policy_tags' => 'graduate',
+		'post_type' => 'policies',
+		'posts_per_page' => 1000,));
+	
+	$policy_content = '';
+	if($query_policies->have_posts()) : 
+		while($query_policies->have_posts()) : $query_policies->the_post(); 
+		
+			$policy_content .= '<h3 id="'.$post->post_name.'">'.get_the_title().'</h3>';
+			$policy_content .= apply_filters('the_content', get_the_content()); 
+			
+			$sublinks[] = array('title' => $post->post_title, 'file' => $post->post_name);
+			
+		endwhile;
+	endif;
+	
+	return array($policy_content, $sublinks);
+}
+ 
+function print_grad_program_list() { 
+	global $post;
+?>
 	<div class="grad-studies grad-programs">
-	<h2>Graduate Degree Programs List</h2>
+	<h2 id="graduate-list">Graduate Degree Programs List</h2>
+	<ul class = "degree-list">
 <?php 
 	$query_programs = new WP_Query(array(
 		'orderby' => 'title', 
@@ -355,19 +492,34 @@ function print_grad_program_list() { ?>
 
 		$post_option=get_field('option_title');
 		if(isset($post_option)&&$post_option!=='')
-			$program_title = $program_title.', '.$post_option;
+			$program_title = $program_title.' - '.$post_option.' Option';
+			
+		$link = get_program_file($post->ID).'#'.$post->post_name;
 							
-		echo '<p>'.$program_title.'</p>';
+		echo '<li><a href="'.$link.'">'.$program_title.'</a></li>';
 		
 	endwhile; endif;
 ?>
+	</ul>
 	</div>
 <?
+	return array('title' => 'Graduate Degree Programs List', 'file' => 'graduate-list');
 }
 
-function print_certificate_list() { ?>
+function print_certificate_list($id) { 
+	global $post;
+?>
 	<div class="grad-studies grad-programs">
-	<h2>Post-Baccalaureate University Certificate Program List</h2>
+	<h2 id="certificate-list">Post-Baccalaureate University Certificate Programs</h2>
+	
+<?php
+	$page = get_post($id);
+	$content = $page->post_content;
+	$content = apply_filters('the_content', $content);
+	echo $content;
+?>	
+	
+	<ul class = "degree-list">
 <?php 
 	$query_programs = new WP_Query(array(
 		'orderby' => 'title', 
@@ -380,14 +532,23 @@ function print_certificate_list() { ?>
 
 		$post_option=get_field('option_title');
 		if(isset($post_option)&&$post_option!=='')
-			$program_title = $program_title.', '.$post_option;
+			$program_title = $program_title.' - '.$post_option.' Option';
+			
+		$link = get_program_file($post->ID).'#'.$post->post_name;
 							
-		echo '<p>'.$program_title.'</p>';
+		echo '<li><a href="'.$link.'">'.$program_title.'</a></li>';
 		
 	endwhile; endif;
 ?>
+	</ul>
+<?php
+	$extra_list = get_field('program_list', $id);
+	$extra_list = apply_filters('the_content', $extra_list);
+	echo $extra_list;
+?>
 	</div>
 <?
+	return array('title' => 'Post-Baccalaureate University Certificate Programs', 'file' => 'certificate-list');
 }
 
 function get_grad_program_name() {
@@ -400,7 +561,7 @@ function get_grad_program_name() {
 	}
 	else 
 	{
-		$program_title = $degree.', '.$program_title;
+		$program_title = $program_title.', '.$degree;
 	}
 	
 	return $program_title;
@@ -413,7 +574,7 @@ function get_grad_program_name() {
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
  function categories() { ?>
 	<div class="gen-ed categories">
-		<h2>General Education Sections</h2>
+		<h2 id="gened-sec">General Education Sections</h2>
 	<?php 
 		$terms = get_terms('general_education');
 		foreach($terms as $term) {
@@ -428,21 +589,26 @@ function get_grad_program_name() {
 					'posts_per_page' => 1000,));
 
 				if($query_policies->have_posts()) {
-					echo '<h3>'.$term->description.'</h3>';
+					echo '<h3 id="'.$term->slug.'">'.$term->description.'</h3>';
+					echo '<ul class="ge-course-list">';
 					while($query_policies->have_posts()) {
 						$query_policies->the_post();
-						echo '<p>'.get_the_title().'</p>';
+						echo '<li>'.get_the_title().'</li>';
 					}
+					echo '</ul>';
+					
+					$sublinks[] = array('title' => $term->description, 'file' => $term->slug);
 				}
 			}
 		} ?>
 	</div>
 <?php
+	return array('title' => 'General Education Sections', 'file' => 'gened-sec', 'sublinks' => $sublinks);
 }
 
 function upper_division() {?>
 	<div class="gen-ed upper-division">
-		<h2>General Education - Upper Division</h2>
+		<h2 id="gened-ud">General Education - Upper Division</h2>
 	<?php 
 		$terms = get_terms('general_education');
 		foreach($terms as $term) {
@@ -457,22 +623,26 @@ function upper_division() {?>
 					'posts_per_page' => 1000,));
 
 				if($query_policies->have_posts()) {
-					echo '<h3>'.$term->description.'</h3>';
+					echo '<h3 id="'.$term->slug.'-ud">'.$term->description.'</h3>';
+					echo '<ul class="ge-course-list">';
 					while($query_policies->have_posts()) {
 						$query_policies->the_post();
-						echo '<p>'.get_the_title().'</p>';
+						echo '<li>'.get_the_title().'</li>';
 					}
+					echo '</ul>';
+					
+					$sublinks[] = array('title' => $term->description, 'file' => $term->slug.'-ud');
 				}
 			}
 		} ?>
 	</div>
 <?php
-
+	return array('title' => 'Upper Division', 'file' => 'gened-ud', 'sublinks' => $sublinks);
 }
 
 function info_competence() {?>
 	<div class="gen-ed information-competence">
-		<h2>General Education - Information Competence</h2>
+		<h2 id="gened-ic">General Education - Information Competence</h2>
 	<?php 
 		$terms = get_terms('general_education');
 		foreach($terms as $term) {
@@ -487,16 +657,21 @@ function info_competence() {?>
 					'posts_per_page' => 1000,));
 
 				if($query_policies->have_posts()) {
-					echo '<h3>'.$term->description.'</h3>';
+					echo '<h3 id="'.$term->slug.'-ic">'.$term->description.'</h3>';
+					echo '<ul class="ge-course-list">';
 					while($query_policies->have_posts()) {
 						$query_policies->the_post();
-						echo '<p>'.get_the_title().'</p>';
+						echo '<li>'.get_the_title().'</li>';
 					}
+					echo '</ul>';
+					
+					$sublinks[] = array('title' => $term->description, 'file' => $term->slug.'-ic');
 				}
 			}
 		} ?>
 	</div>
 <?php
+	return array('title' => 'Information Competence', 'file' => 'gened-ic', 'sublinks' => $sublinks);
 }
  
  /* * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -505,25 +680,34 @@ function info_competence() {?>
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 function undergrad_policies(){
+	global $post;
+	
 	$query_policies = new WP_Query(array(
-		'orderby' => 'title', 
+		'orderby' => 'name', 
 		'order' => 'ASC',  
 		'policy_tags' => 'undergrad',
 		'post_type' => 'policies',
 		'posts_per_page' => 1000,));
 		
-	if($query_policies->have_posts()) : ?>
+	if($query_policies->have_posts()) : 
+	?>
 	<div class = "undergrad undergrad-policies">
-		<h2>Undergraduate Programs, Policies and Procedures</h2>
+		<h2 id="undergrad-policies">Undergraduate Programs, Policies and Procedures</h2>
 		<?php while($query_policies->have_posts()) : $query_policies->the_post(); ?>
-			<h3><?php echo the_title(); ?></h3>
-			<?php echo the_content(); ?>
+			<h3 id="<?php echo $post->post_name; ?>"><?php echo the_title(); ?></h3>
+			<?php echo the_content(); 
+			$sublinks[] = array('title' => $post->post_title, 'file' => $post->post_name);
+			?>
 		<?php endwhile; ?>
 	</div>
-	<?php endif; 
+	<?php endif;
+	
+	return array('title' => 'Undergraduate Programs, Policies and Procedures', 'file' => 'undergrad-policies', 'sublinks' => $sublinks);
 }
 
 function degree_list() {
+	global $post;
+	
 	$query_programs = new WP_Query(array(
 		'orderby' => 'title', 
 		'order' => 'ASC',  
@@ -533,9 +717,13 @@ function degree_list() {
 		
 	if($query_programs->have_posts()) : ?>
 		<div class="program-list undergrad">
-		<h2> Undergraduate Degree Program List</h2>
-		<?php while($query_programs->have_posts()) : $query_programs->the_post(); ?>
-		<p>
+		<h2 id="undergrad-degree-list">Undergraduate Degree Program List</h2>
+		<ul class = "degree-list">
+		<?php while($query_programs->have_posts()) : $query_programs->the_post(); 
+			$link = get_program_file($post->ID).'#'.$post->post_name;
+		?>
+		<li>
+		<a href="<?php echo $link; ?>">
 <?php			$degree = get_field('degree_type');
 			$program_title = get_the_title();
 			$post_option=get_field('option_title');
@@ -543,11 +731,40 @@ function degree_list() {
 			echo $program_title.', '.$degree;
 			
 			if(isset($post_option)&&$post_option!=='')
-				echo ' - '.$post_option;
+				echo ' - '.$post_option.' Option';
 ?>
-		</p>
+		</a>
+		</li>
 		<?php endwhile; ?>
+		</ul>
 		</div>
 	<?php endif;
+	
+	return array('title' => 'Undergraduate Degree Program List', 'file' => 'undergrad-degree-list');
+}
+
+function get_program_file($id) {
+	$terms =  wp_get_post_terms( $id, 'department_shortname' );
+		
+	foreach($terms as $term){
+	//ge and top level terms can't be the category
+		if($term->parent != 0 && $term->parent != 511) {
+			//save the description of the category that works
+			$dpt = $term->description;
+		}
+	}
+		
+	if(!isset($dpt)){		//if it only has a top level
+		foreach($terms as $term){
+			if($term->slug !== 'ge') {
+				//save the description of the category that works
+				$dpt = $term->description;
+			}
+		}
+	}
+		
+	$file = strtolower(sanitize_key($dpt)).'.xhtml';
+	
+	return $file;
 }
 	

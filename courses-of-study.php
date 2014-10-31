@@ -7,15 +7,40 @@ function courses_of_study($content) {
 	$colleges = array('cecs', 'hhd', 'coh', 'educ', 'amc', 'csbs', 'csm');
 	$dir = './book/OEBPS/';
 	
-	$filename = strtolower(sanitize_file_name($content['listTitle']));
+	$filename = strtolower(sanitize_key($content['listTitle']));
 	$filenames[0] = array(
 			'title' => $content['listTitle'],
 			'file' => $filename
 		);
+		
+	//Course Policies
+	if(isset($content['policies']) && $content['policies']) {
+		$title = 'Course Policies';
+		ob_start();
+		
+		print_header($title);
+		$sublinks = course_policies();
+		print_footer();
+		
+		$output = ob_get_contents();		//save output
+		ob_end_clean();						//discard buffer
+		
+		$filename = strtolower(sanitize_key($title));
+		$filenames[] = array(
+					'title' =>$title, 
+					'file' => $filename,
+					'sublinks' => $sublinks,
+				);
+		
+		$f = fopen($dir.$filename.'.xhtml', "w");
+		fwrite($f, $output);
+		fclose($f);
+	}
 	
 	//Programs of Study
 	foreach($content['categories'] as $slug => $id)
 	{
+		$sublinks = array();
 		ob_start();
 		
 		if(in_array($slug, $colleges))
@@ -34,7 +59,7 @@ function courses_of_study($content) {
 			
 			print_header($title);
 			echo '<h2>Office of Undergraduate Studies</h2>';
-			print_courses('univ');
+			$sublinks = array(print_courses('univ'));
 			print_footer();
 		}
 		else
@@ -43,40 +68,18 @@ function courses_of_study($content) {
 			$title = $deptterm->description;
 			
 			print_header($title, false);
-			get_course_of_study($deptterm);
+			$sublinks = get_course_of_study($deptterm);
 			print_footer();
 		}
 				
 		$output = ob_get_contents();		//save output
 		ob_end_clean();						//discard buffer
 		
-		$filename = strtolower(sanitize_file_name($title));
+		$filename = strtolower(sanitize_key($title));
 		$filenames[] = array(
 					'title' =>$title, 
-					'file' => $filename
-				);
-		
-		$f = fopen($dir.$filename.'.xhtml', "w");
-		fwrite($f, $output);
-		fclose($f);
-	}
-	
-	//Course Policies
-	if(isset($content['policies']) && $content['policies']) {
-		$title = 'Course Policies';
-		ob_start();
-		
-		print_header($title);
-		course_policies();
-		print_footer();
-		
-		$output = ob_get_contents();		//save output
-		ob_end_clean();						//discard buffer
-		
-		$filename = strtolower(sanitize_file_name($title));
-		$filenames[] = array(
-					'title' =>$title, 
-					'file' => $filename
+					'file' => $filename,
+					'sublinks' => $sublinks,
 				);
 		
 		$f = fopen($dir.$filename.'.xhtml', "w");
@@ -85,7 +88,7 @@ function courses_of_study($content) {
 	}
 	
 	//Table of Contents
-	table_of_contents($filenames, 0);		//make this
+	table_of_contents($filenames, 0, false);		//make this
 	
 	return $filenames;
 }
@@ -101,11 +104,20 @@ function course_policies() {
 		
 		if($policy)
 		{
-			echo '<h3>'.$policy[0]->title.'</h3>';
-			echo apply_filters('the_content', $policy[0]->post_content);
+			echo '<h2 id="'.$policy[0]->post_name.'">'.$policy[0]->post_title.'</h2>';
+			
+			$content = $policy[0]->post_content;
+			$content = apply_filters('the_content', $content);
+			$content = lower_headings($content, 2);
+					
+			echo $content;
+			
+			$sublinks[] = array('title' => $policy[0]->post_title, 'file' => $policy[0]->post_name);
 		}
 	}
 	echo '</div>';
+	
+	return $sublinks;
 }
 
 function print_college($college)
@@ -113,13 +125,14 @@ function print_college($college)
 	$id = $college->ID;
 	global $post;
 
+	echo '<div class = "main course-of-study">';
 	//college title
 	echo '<h1>'.$college->post_title.'</h1>';
 	//college contact
 	echo apply_filters('the_content', get_field('contact', $id));
 	//college program list
 	echo $college->name;
-	print_program_list($college->post_name);
+	print_program_list($college->post_name, $college);
 	//college content
 	echo apply_filters('the_content', $college->post_content);
 	//college courses
@@ -132,7 +145,9 @@ function print_college($college)
 	{
 		echo '<h3>Course List</h3>';
 		echo apply_filters('the_content', get_field('college_courses', $id));
-	} 
+	}
+	
+	echo '</div>';
 }
 
 function get_course_of_study($deptterm) {
@@ -144,10 +159,11 @@ function get_course_of_study($deptterm) {
 	$college = $collegeterm->description;
 ?>
 	<div class = "main course-of-study">
-		<h1><?php echo $title; ?></h1>
+		<h1><?php echo $title; ?>
 		<?php if($dept !== 'bus')
-			echo '<h2>'.$college.'</h2>';
+			echo '<span class = "subhead">'.$college.'</span>';
 		
+		echo '</h1>';
 		print_contact($dept);
 		
 		if($dept !== 'bus') 
@@ -158,11 +174,13 @@ function get_course_of_study($deptterm) {
 		
 		print_program_list($dept);
 		print_department($dept);
-		print_programs($dept);
-		print_courses($dept); 
+		$sublinks = print_programs($dept);
+		$sublinks[] = print_courses($dept); 
 ?>
 	</div>
-<?php }
+<?php 
+	return $sublinks;
+}
 
 
 
@@ -177,13 +195,15 @@ function print_courses($dept) {
 		
 	if($query_course->have_posts()) : ?>
 		<div class="courses course-of-study">
-		<h3>Course List</h3>
+		<h2 id="course-<?php echo $dept; ?>">Course List</h2>
 		<?php while($query_course->have_posts()) : $query_course->the_post();
 			echo '<h4>'.get_the_title().'</h4>';
 			echo apply_filters('the_content', get_the_content());
 		endwhile; ?>
 		</div>
-	<?php endif;
+	<?php 
+		return array('title' => 'Course List', 'file' => 'course-'.$dept);
+	endif;
 }
 
 function print_programs($dept) {
@@ -203,26 +223,40 @@ function print_programs($dept) {
 		if($query_programs->have_posts()) :
 			while($query_programs->have_posts()) : $query_programs->the_post();
 				$degree = get_field('degree_type');
-				if(($level !== "credential" || ((!$authorizations) && ($degree === 'credential' || $degree === 'Credential'))) ||
-					($level === "credential" && ($degree === 'authorization' || $degree === 'Authorization') && $authorizations) ) :
-					print_program();
+				if($level !== "credential" || ((!$authorizations && ($degree === 'credential' || $degree === 'Credential')) ||
+						($authorizations && ($degree === 'authorization' || $degree === 'Authorization')))) :
+					$sublinks[] = print_program();
 				endif;
 			endwhile; 
-		endif; 
+		endif;
+		
+		if($level === "credential") 
+			$authorizations = true;
+		
 	endforeach;
 	
 	echo '</div>';
+	
+	return $sublinks;
 }
 
-function print_program() { ?>
+function print_program() { 
+	global $post;
+?>
 	<div class="program course-of-study">
-		<h2><?php echo get_program_name(); ?></h2>
+		<h2 id="<?php echo $post->post_name; ?>"><?php echo get_program_name(); ?>
 							
 		<?php $post_option=get_field('option_title');
 
-		if(isset($post_option)&&$post_option!=='') 
-			echo '<h3 class="subtitle">'.$post_option.'</h3>';
+		$title = get_program_name();
+		
+		if(isset($post_option)&&$post_option!=='') {
+			echo '<span class="subhead">'.$post_option.' Option</span>';
+			$title .=' - '.$post_option;
+		}
 
+		echo '</h2>';
+		
 		echo '<h3>Overview</h3>';
 		the_content();
 		
@@ -239,9 +273,13 @@ function print_program() { ?>
 		}
 							
 	echo '</div>';
+	
+	return array('title' => $title, 'file' => $post->post_name);
 }
 
-function print_program_list($dept) { ?>
+function print_program_list($dept, $college = false) { 
+	global $post;
+?>
 	<div class="program-list course-of-study">
 		<h3>Programs</h3>
 		<?php 
@@ -272,6 +310,7 @@ function print_program_list($dept) { ?>
 					echo '<h4>'.ucwords($level).'</h4> ';
 				}
 				
+				echo '<ul class="program-list">';
 				while($query_programs->have_posts()) { $query_programs->the_post();
 					$degree = get_field('degree_type');
 					
@@ -282,11 +321,17 @@ function print_program_list($dept) { ?>
 
 						$post_option=get_field('option_title');
 						if(isset($post_option)&&$post_option!=='')
-							$program_title = $program_title.', '.$post_option;
+							$program_title = $program_title.' - '.$post_option.' Option';
 							
-						echo '<p>'.$program_title.'</p>';
+						if($college)
+							$link = get_program_file($post->ID).'#'.$post->post_name;
+						else
+							$link = '#'.$post->post_name;
+							
+						echo '<li><a href="'.$link.'">'.$program_title.'</a></li>';
 					}
-				} 
+				}
+				echo '</ul>';
 			}
 		}
 		?>
@@ -317,7 +362,7 @@ function get_program_name() {
 		$program_title = $program_title;
 	}
 	else {
-		$program_title = $degree.', '.$program_title;
+		$program_title = $program_title.', '.$degree;
 	}
 	
 	return $program_title;
@@ -374,7 +419,13 @@ function print_department($dept) {
 			<?php echo apply_filters('the_content', get_field('student_orgs')); ?>
 		<?php endif; ?>
 			
-		<?php the_content(); ?>
+		<?php 
+		$content = get_the_content(); 
+		$content = apply_filters('the_content', $content);
+		$content = $content = lower_headings($content, 2);
+		
+		echo $content;
+		?>
 	
 		</div>
 
@@ -398,14 +449,16 @@ function print_dept_faculty($dept) {
 				$query_faculty->the_post();
 				$post_counter++;
 				
-				$name = get_the_title();
-				$names = explode(", ", $name);
-				$name = $names[1]." ".$names[0];
-				
-				echo $name;
-				
-				if( $post_counter < $query_faculty->post_count ) 
-					echo ', ';
+				if( strpos(get_the_term_list(  $post->ID, 'department_shortname', '', ', '), 'Emeriti') === FALSE):
+					$name = get_the_title();
+					$names = explode(", ", $name);
+					$name = $names[1]." ".$names[0];
+					
+					echo $name;
+					
+					if( $post_counter < $query_faculty->post_count ) 
+						echo ', ';
+				endif;
 			} ?>
 			
 		</div>

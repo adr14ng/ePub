@@ -10,6 +10,7 @@ body {
 	margin-right: 5%; 
 	margin-top: 5%; 
 	margin-bottom: 5%;
+	font-family: serif;
 }
 
 /* ---- Headers ---- */
@@ -25,11 +26,12 @@ h1, h2, h3, h4, h5, h6 {
 	-webkit-hyphens: none;
 	adobe-hyphenate: none;
 	text-align: left;
+	margin: .75em 0 .75em;
 }
 
 p {
-	text-indent: 1.5em;
-	margin: .25em 0;
+	text-indent: 1.5em each-line;
+	margin: 0 0 .75em;
 }
 
 /* ---- Lists ---- */
@@ -38,9 +40,12 @@ ol.upper-alpha {list-style-type: upper-alpha;}
 ol.lower-alpha {list-style-type: lower-alpha;}
 ol.upper-roman {list-style-type: upper-roman;}
 ol.lower-roman {list-style-type: lower-roman;}
+ol.toc {list-style-type: none;}
+ul.degree-list{list-style-type: none; margin: 0; padding: 0;}
 ul.disc {list-style-type: disc;}
 ul.circle {list-style-type: circle;}
 ul.square {list-style-type: square;}
+ul.none {list-stype-type: none;}
 li {
     line-height: 1.5em;
     text-align: left;
@@ -65,16 +70,21 @@ table.border, table.border th, table.border td {
 	page-break-inside: avoid;
 }
 
-.office-of-the-chancellor p, .university-administration p{
-	text-indent: 0;
-	margin-left: 1.5em;
-	page-break-inside:avoid;
+.office-of-the-chancellor p, .university-administration p,
+.colleges-degrees-and-accreditation p{
+	page-break-listinside:avoid;
 }
 
 /* ---- General Education --- */
 .pattern-modifications p{
 	text-indent: 0;
 	margin: 1.5em;
+}
+
+ul.ge-course-list{
+	list-style-type: none; 
+	padding: 0;
+	margin: 0;
 }
 
 /* ---- Courses of Study ---- */
@@ -85,6 +95,13 @@ table.border, table.border th, table.border td {
 .course-of-study h4 { font-size: 120%;}
 .course-of-study h5 { font-size: 110%;}
 .course-of-study h6 { font-size: 100%;}
+
+.course-of-study h1 .subhead { font-size: 75%; }
+.course-of-study h2 .subhead { font-size: 90%; }
+
+.course-of-study .subhead { 
+	display: block; 
+}
 
 .course-of-study .contact {
 	font-weight: bold;
@@ -108,9 +125,9 @@ table.border, table.border th, table.border td {
 	font-size: medium;
 }
 
-.course-of-study .program-list p {
-	margin-left: 1.5em;
-	text-indent: 0;
+.course-of-study .program-list ul {
+	margin:0;
+	list-style-type: none;
 }
 
 .course-of-study .program-list h4 {
@@ -118,12 +135,7 @@ table.border, table.border th, table.border td {
 }
 
 .course-of-study .department-info p{
-	margin-left: 1.5em;
-}
-
-.course-of-study .programs h2 {
-	font-size: large;
-	font-family: sans-serif;
+	margin-left: 0em;
 }
 
 .course-of-study .program h4, .course-of-study .program h5,
@@ -150,7 +162,7 @@ table.border, table.border th, table.border td {
 	font-size: 110%;
 }
 
-.course-of-study .courses h3{
+.course-of-study .courses h2{
 	text-align: left;
 	border-bottom: solid 5px #5e5e5e;
 	margin-top: 20px;
@@ -163,16 +175,57 @@ table.border, table.border th, table.border td {
 }
 
 .course-of-study .courses p {
-	margin-left: 1.5em;
+	margin-left: 0.5em;
 	text-indent: 0;
+}
+
+.policies.course-of-study h2 {
+	font-size: 115%;
+}
+
+.policies.course-of-study h3{
+	font-size: 105%;
+	font-family: serif;
+}
+
+/* ---- Policies ---- */
+.policies h2 {
+	font-size: 125%;
+}
+
+.policies h3 {
+	font-size: 110%;
+	font-family: sans-serif;
+	font-weight: 600;
+	margin-left: 1em;
+}
+
+.policies h4 {
+	font-size: 105%;
+	margin-left: 1em;
+}
+
+.policies h5 {
+	font-size: 100%;
+	margin-left: 1em;
+}
+
+.policies p {
+	margin-left: 1em;
+}
+
+.policies ol, .policies li {
+	margin-left: .25em;
 }
 
 /* ---- Faculty ---- */
 .faculty p{
 	text-indent:0;
 	font-size: small;
+	margin: .10em 0;
 }
 .faculty h2{
 	text-indent:0;
 	font-size: medium;
+	margin: 0.75 0 0;
 }

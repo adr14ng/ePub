@@ -108,17 +108,15 @@ function default_values() {
 				),
 		'grad' => array(
 					'title' => 'Research and Graduate Studies',
-					'pages' => array(
-							0 	=> 186
-						),
+					'pages' => 186,
 					'proglist' => true,
+					'certlist' => 28943,
 				),
 		'credential' => array(
 					'title' => 'Credential Office',
 					'pages' => array(
 							0 	=> 28825
 						),
-					'proglist' => true,
 				),
 		'study' => array(
 					'title' => 'Courses of Study',
@@ -227,7 +225,7 @@ function default_values() {
 		'creator' => 'Undergraduate Studies',
 		'language' => 'en-US',
 		'rights' => '',
-		'publisher' => 'California State Univeristy, Northridge',
+		'publisher' => 'California State University, Northridge',
 		'bookid' => '20142015CSUN'
 	);
 		
@@ -242,11 +240,29 @@ function filter_tags($content)
 	//remove span tags
 	$content = preg_replace('/<\s*\/*(span)[^>]*>/i', '', $content);
 	
+	//remove center tags
+	$content = preg_replace('/<\s*\/*(center)[^>]*>/i', '', $content);
+	
+	//remove section tags
+	$content = preg_replace('/<\s*\/*(section)[^>]*>/i', '', $content);
+	
+	//remove article tags
+	$content = preg_replace('/<\s*\/*(article)[^>]*>/i', '', $content);
+	
 	//change list-style to class
 	$content = preg_replace('/style=[\'|"]list-style-type:([^;]*);[\'|"]/i', 'class="$1"', $content);
 	
 	//remove style attributes
 	$content = preg_replace('/style=((\'.*?\')|(".*?"))/i', '', $content);
+	
+	//remove start
+	$content = preg_replace('/start=((\'.*?\')|(".*?"))/i', '', $content);
+	
+	//remove type
+	$content = preg_replace('/type=((\'.*?\')|(".*?"))/i', '', $content);
+	
+	//remove target
+	$content = preg_replace('/target=((\'.*?\')|(".*?"))/i', '', $content);
 	
 	//remove iFrame and it's content
 	$content = preg_replace('/<iframe (.)*<\/iframe>/i', '', $content);
@@ -288,4 +304,30 @@ function lower_headings($content, $level)
 function clear_double_headings($content){
 	$content = preg_replace('/<[^>]*extra-header[^>]*>[\s\S]*?<[^>]*>/i', '', $content);
 	return $content;
+}
+
+function add_ids($content) {
+	//ensure h2's have ids
+	$content = preg_replace_callback(
+		'/<h2 (?:(?!id=))+([^>]*>)(.*?)<\/h2>/i', 
+		function ($perams) {
+			$id = strtolower(sanitize_key(strip_tags($perams[2])));
+			return '<h2 id="'.$id.'" '.$perams[1].$perams[2].'</h2>';
+		},
+		$content);
+		
+	return $content;
+}
+
+function get_sublinks($content) {		
+	//get the ids of the h2s
+	preg_match_all( '/<h2 id="([^"]*)"([^>]*)>(.*?)<\/h2>/i', $content, $out, PREG_SET_ORDER);
+	
+	//make sublinks
+	foreach($out as $key=>$item){
+		$sublink[$key]['title'] = strip_tags($item[3]);
+		$sublink[$key]['file'] = $item[1];
+	}
+	
+	return $sublink;
 }

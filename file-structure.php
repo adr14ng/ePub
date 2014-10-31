@@ -93,6 +93,7 @@ function container() {
 function tocNCX($contents, $options) {
 	$dir = './book/OEBPS/';
 	$count = 0;
+	
 	ob_start();
 	echo '<?xml version="1.0" encoding="UTF-8"?>'."\n";
 ?>
@@ -112,15 +113,41 @@ function tocNCX($contents, $options) {
 		<navMap>
 		<?php foreach($contents as $section) : 
 			$count++; ?>
-			<navPoint id="<?php echo $section['file']; ?>" playOrder="<?php echo $count; ?>">
+			<navPoint id="<?php echo $section['file'].'-'.$count; ?>" playOrder="<?php echo $count; ?>">
 				<navLabel><text><?php echo $section['title']; ?></text></navLabel>
 				<content src="<?php echo $section['file']; ?>.xhtml"/>
 				
+				<?php if(isset($section['sublinks'])): foreach($section['sublinks'] as $sublink):
+					$count++; ?>
+					<navPoint id="<?php echo $sublink['file'].'-'.$count; ?>" playOrder="<?php echo $count; ?>">
+						<navLabel><text><?php echo $sublink['title']; ?></text></navLabel>
+						<content src="<?php echo $section['file'].'.xhtml#'.$sublink['file']; ?>"/>
+						
+						<?php if(isset($sublink['sublinks'])): foreach($sublink['sublinks'] as $subsublink):
+							$count++; ?>
+							<navPoint id="<?php echo $subsublink['file'].'-'.$count; ?>" playOrder="<?php echo $count; ?>">
+								<navLabel><text><?php echo $subsublink['title']; ?></text></navLabel>
+								<content src="<?php echo $section['file'].'.xhtml#'.$subsublink['file']; ?>"/>
+							</navPoint>
+						<?php endforeach; endif; ?>
+						
+					</navPoint>
+				<?php endforeach; endif; ?>
+				
 				<?php if(isset($section['subpages'])): foreach($section['subpages'] as $subsection):
 					$count++; ?>
-					<navPoint id="<?php echo $subsection['file']; ?>" playOrder="<?php echo $count; ?>">
+					<navPoint id="<?php echo $subsection['file'].'-'.$count; ?>" playOrder="<?php echo $count; ?>">
 						<navLabel><text><?php echo $subsection['title']; ?></text></navLabel>
 						<content src="<?php echo $subsection['file']; ?>.xhtml"/>
+						
+						<?php if(isset($subsection['sublinks'])): foreach($subsection['sublinks'] as $sublink): if(isset($sublink['title'])) :
+							$count++; ?>
+							<navPoint id="<?php echo $sublink['file'].'-'.$count; ?>" playOrder="<?php echo $count; ?>">
+								<navLabel><text><?php echo $sublink['title']; ?></text></navLabel>
+								<content src="<?php echo $subsection['file'].'.xhtml#'.$sublink['file']; ?>"/>
+							</navPoint>
+						<?php endif; endforeach; endif; ?>
+						
 					</navPoint>
 				<?php endforeach; endif; ?>
 				
