@@ -13,8 +13,8 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 function print_content($content) {
-
-	$dir = './book/OEBPS/';
+	global $book_dir;
+	$dir = $book_dir.'/OEBPS/';
 	$index = 0;
 
 	foreach($content as $type => $section){
@@ -266,7 +266,8 @@ function print_pages($pages, $base_class = '') {
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
  function table_of_contents($file_names, $toc_index, $sublinks) {
-	$dir = './book/OEBPS/';
+	global $book_dir;
+	$dir = $book_dir.'/OEBPS/';
 	
 	ob_start(); 
 	print_header($file_names[$toc_index]['title'], false); ?>

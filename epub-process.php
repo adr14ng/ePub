@@ -1,10 +1,12 @@
 <?php
 
-print_r($_POST);
 
 //epub->plugs->wp-content->base
 $base_url = dirname(dirname(dirname(dirname(__FILE__))));
 require_once($base_url.'/wp-admin/admin.php');
+
+//epub->plugs->wp-content
+$book_dir = $base_url.'/wp-content/uploads/epub';
 
 if(isset($_POST['action']) && $_POST['action'] == 'epub-creation')
 {
@@ -27,29 +29,81 @@ if(isset($_POST['action']) && $_POST['action'] == 'epub-creation')
 	if(isset($_POST['default']))
 	{
 		set_time_limit(300);
+		
+		$dir = sanitize_file_name($df_options['title']);
+		$zip_file = $book_dir.'/'.$dir.'.epub';
+		$book_dir .= '/'.$dir;
+		
+		echo $book_dir;
+		
+		mkdir($book_dir, 0775, true);
 		create_book($content, $df_options);
 	}
 	else
 	{
-		/*$options = array_intersect_key($_POST, $df_options);
+		$options = array_intersect_key($_POST, $df_options);
 		array_merge($df_options, $options);
-		
-		create_book($content, $options);*/
+
+		$dir = sanitize_file_name($options['title']);
+		$zip_file = $book_dir.'/'.$dir.'.epub';
+		$book_dir .= '/'.$dir;
+
+		mkdir($book_dir, 0775, true);
+		create_book($content, $options);
 	}
+
 	
-	/*
-	//Redirect back to page
+	create_archive($zip_file);
+	
+	header("Content-disposition: attachment; filename=".$dir.".epub");
+	header("Content-type: application/epub+zip");
+	readfile($zip_file);
+	
 	if(isset($_POST['return']))
 		wp_redirect( $_POST['return'] );
 	else
 		wp_redirect( admin_url() );
+}
+
+function create_archive($epubFile)
+{
+	global $book_dir;
+	$excludes = array('mimetype.zip');
 	
-	*/
+	$mimeZip = $book_dir.'/mimetype.zip';
+	$zipFile = sys_get_temp_dir() . '/book.zip';
+	
+	if(!copy($mimeZip, $zipFile))
+		throw new Exception("Unable to copy temporary archive file.");
+		
+	$zip = new ZipArchive();
+	if ($zip->open($zipFile, ZipArchive::CREATE) != true) {
+		throw new Exception("Unable to open archive '$zipFile'");
+	}
+	
+	$files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($book_dir), RecursiveIteratorIterator::SELF_FIRST);
+	foreach($files as $file)
+	{
+		if(in_array(basename($file), $excludes))
+			continue;
+		
+		if(is_dir($file))
+		{
+			$zip->addEmptyDir(str_replace("$book_dir/", '', "$file/"));
+		}
+		elseif(is_file($file)) {
+			$zip->addFromString(str_replace("$book_dir/", '', $file), file_get_contents($file));
+		}
+	}
+	
+	$zip->close();
+	
+	rename($zipFile, $epubFile);
 }
 
 
 function default_values() {
-	
+
 	$content = array(
 		'cover' => array( 'title' => 'Univeristy Catalog'),
 		'toc' => array('title' => "Table of Contents"),
@@ -226,7 +280,8 @@ function default_values() {
 		'language' => 'en-US',
 		'rights' => '',
 		'publisher' => 'California State University, Northridge',
-		'bookid' => '20142015CSUN'
+		'bookid' => '20142015CSUN',
+		'cover' => 'default',
 	);
 		
 	return array($content, $options);

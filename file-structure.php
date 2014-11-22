@@ -2,20 +2,47 @@
 
 
 function create_book($content, $options) {
+	global $book_dir;
+
+	//copy mimetype
+	copy('./book/mimetype.zip' ,$book_dir.'/mimetype.zip');
+	
+	//create META-INF
+	mkdir($book_dir.'/META-INF', 0775);
+	//create OEBPS & images
+	mkdir($book_dir.'/OEBPS/images', 0775, true);
+	
+	//create content
 	$files = print_content($content);
 	
-	//create mimetype
-	mimetype();
+	//copy style.css
+	copy('./book/OEBPS/style.css' ,$book_dir.'/OEBPS/style.css');
+	//copy page-template.xpgt
+	copy('./book/OEBPS/page-template.xpgt' ,$book_dir.'/OEBPS/page-template.xpgt');
+	
+	epub_cover($options['cover']);
+	
 	//create container.xml
 	container();
 	//create content.opf
 	contentOPF($files, $options);
 	//create toc.ncx
 	tocNCX($files, $options);
+
+}
+
+function epub_cover($cover)
+{
+	global $book_dir;
+	if($cover === 'default')
+	{
+		copy('./book/OEBPS/images/cover.png', $book_dir.'/OEBPS/images/cover.png');
+	}
 }
 
 function contentOPF($contents, $options) {
-	$dir = './book/OEBPS/';
+	global $book_dir;
+	$dir = $book_dir.'/OEBPS/';
 	ob_start();
 	echo  '<?xml version="1.0" encoding="UTF-8"?>'."\n";
 ?>
@@ -63,16 +90,9 @@ function contentOPF($contents, $options) {
 	fclose($f);
 }
 
-function mimetype() {
-	$dir = './book/';
-	
-	$f = fopen($dir.'mimetype', "w");
-	fwrite($f, 'application/epub+zip');
-	fclose($f);
-}
-
 function container() {
-	$dir = './book/META-INF/';
+	global $book_dir;
+	$dir = $book_dir.'/META-INF/';
 	ob_start();
 	echo '<?xml version="1.0"?>'."\n";
 ?>
@@ -91,7 +111,8 @@ function container() {
 }
 
 function tocNCX($contents, $options) {
-	$dir = './book/OEBPS/';
+	global $book_dir;
+	$dir = $book_dir.'/OEBPS/';
 	$count = 0;
 	
 	ob_start();

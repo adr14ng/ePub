@@ -5,7 +5,8 @@
 
 function courses_of_study($content) {
 	$colleges = array('cecs', 'hhd', 'coh', 'educ', 'amc', 'csbs', 'csm');
-	$dir = './book/OEBPS/';
+	global $book_dir;
+	$dir = $book_dir.'/OEBPS/';
 	
 	$filename = strtolower(sanitize_key($content['listTitle']));
 	$filenames[0] = array(
@@ -208,7 +209,7 @@ function print_courses($dept) {
 
 function print_programs($dept) {
 	echo '<div class="programs course-of-study">';
-	$levels = array('major', 'honor', 'minor', 'master', 'doctorate', 'credential', 'credential', 'certificate');
+	$levels = array('major', 'honor', 'minor', 'master', 'doctorate', 'credential', 'credential', 'certificate', 'other');
 	$authorizations = false;
 		
 	foreach($levels as $level) : 
@@ -283,7 +284,7 @@ function print_program_list($dept, $college = false) {
 	<div class="program-list course-of-study">
 		<h3>Programs</h3>
 		<?php 
-		$levels = array('major', 'honor', 'minor', 'master', 'doctorate', 'credential', 'credential', 'certificate');
+		$levels = array('major', 'honor', 'minor', 'master', 'doctorate', 'credential', 'credential', 'certificate', 'other');
 		$authorizations = false;
 		
 		foreach($levels as $level) { 
