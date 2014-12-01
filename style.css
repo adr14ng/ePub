@@ -1,0 +1,51 @@
+.options {
+	background: #eee;
+	border: 1px solid #666;
+	margin: 10px;
+}
+
+.options-inside {
+	background: #fff;
+	border-top: 1px solid #666;
+	padding: 10px;
+}
+
+.options-title {
+	padding: 10px 15px;
+	margin: 0px;
+}
+
+#sortable { 
+	list-style-type: none; 
+	margin: 0; 
+	padding: 0; 
+	width: 40%; 
+}
+
+.list-box-title {
+	float: left;
+	width: 45%;
+	margin-left: 15px;
+	font-weight: bold;
+}
+
+ul.list-box {
+	border: 1px solid #eee;
+	list-style-type: none;
+	float: left;
+	margin-right: 10px;
+	padding: 5px;
+	width:45%;
+	min-height: 20px;
+}
+
+.list-box li {
+	padding-left: 5px;
+}
+
+.clearfix:after { 
+   content: " ";
+   display: block; 
+   height: 0; 
+   clear: both;
+}

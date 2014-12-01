@@ -24,7 +24,7 @@ if(isset($_POST['action']) && $_POST['action'] == 'epub-creation')
 	require_once $plug_in_dir . '/courses-of-study.php';
 	require_once $plug_in_dir . '/content.php';
 	
-	list($content, $df_options) = default_values();
+	list($df_content, $df_options) = default_values();
 	
 	if(isset($_POST['default']))
 	{
@@ -37,11 +37,14 @@ if(isset($_POST['action']) && $_POST['action'] == 'epub-creation')
 		echo $book_dir;
 		
 		mkdir($book_dir, 0775, true);
-		create_book($content, $df_options);
+		create_book($df_content, $df_options);
 	}
 	else
 	{
-		$options = array_intersect_key($_POST, $df_options);
+		print_r($_POST);
+		return;
+		/*
+		$options = array_intersect_key($_POST['options'], $df_options);
 		array_merge($df_options, $options);
 
 		$dir = sanitize_file_name($options['title']);
@@ -49,7 +52,8 @@ if(isset($_POST['action']) && $_POST['action'] == 'epub-creation')
 		$book_dir .= '/'.$dir;
 
 		mkdir($book_dir, 0775, true);
-		create_book($content, $options);
+		create_book($_POST['content'], $options);
+		*/
 	}
 
 	
@@ -105,7 +109,7 @@ function create_archive($epubFile)
 function default_values() {
 
 	$content = array(
-		'cover' => array( 'title' => 'Univeristy Catalog'),
+		'cover' => array( 'title' => 'University Catalog'),
 		'toc' => array('title' => "Table of Contents"),
 		'csun' => array(
 					'title' => "CSUN",
@@ -162,7 +166,9 @@ function default_values() {
 				),
 		'grad' => array(
 					'title' => 'Research and Graduate Studies',
-					'pages' => 186,
+					'pages' => array(
+							0	=> 186
+						),
 					'proglist' => true,
 					'certlist' => 28943,
 				),
@@ -176,98 +182,98 @@ function default_values() {
 					'title' => 'Courses of Study',
 					'listTitle' => 'Colleges, Departments and Programs',
 					'categories' => array(
-							'acct' 	=> 17,
-							'afric' => 3,
-							'afrs' 	=> 60,
-							'ais' 	=> 4,
-							'anth' 	=> 5,
-							'art' 	=> 6,
-							'aas' 	=> 7,
-							'asian' => 8,
-							'at' 	=> 452,
-							'biol' 	=> 9,
-							'gbus' 	=> 25,
-							'blaw' 	=> 18,
-							'calif' => 10,
-							'cas' 	=> 12,
-							'chem' 	=> 11,
-							'chs' 	=> 13,
-							'cadv' 	=> 31,
-							'ctva' 	=> 32,
-							'cecm' 	=> 50,
-							'cd' 	=> 37,
-							'coms' 	=> 36,
-							'comp' 	=> 38,
-							'bus' 	=> 457,	//college
-							'deaf' 	=> 40,
-							'econ' 	=> 23,
-							'elps' 	=> 41,
-							'epc' 	=> 42,
-							'ece' 	=> 43,
-							'eed' 	=> 44,
-							'cecs' 	=> 100,	//college
-							'engl' 	=> 101,
-							'eoh' 	=> 102,
-							'fcs' 	=> 47,
-							'fin' 	=> 24,
-							'gws' 	=> 88,
-							'geog' 	=> 90,
-							'geol' 	=> 103,
-							'hhd' 	=> 53,	//college
-							'hsci'	=> 55,
-							'hist' 	=> 64,
-							'humsex'=> 428,
-							'coh' 	=> 429,	//college
-							'huma' 	=> 489,
-							'js' 	=> 94,
-							'jour' 	=> 95,
-							'kin' 	=> 105,
-							'lrs' 	=> 107,
-							'ling' 	=> 108,
-							'mgt' 	=> 27,
-							'msem' 	=> 69,
-							'mkt' 	=> 28,
-							'math' 	=> 70,
-							'educ' 	=> 167,	//college
-							'meis' 	=> 74,
-							'amc' 	=> 168,	//college
-							'me' 	=> 73,
-							'mcll' 	=> 75,
-							'mus' 	=> 83,
-							'nurs' 	=> 56,
-							'phil' 	=> 61,
-							'pt' 	=> 96,
-							'phys' 	=> 120,
-							'pols' 	=> 63,
-							'psy' 	=> 121,
-							'mpa' 	=> 122,
-							'qs' 	=> 123,
-							'rtm' 	=> 124,
-							'rs' 	=> 91,
-							'csm' 	=> 169,
-							'sed' 	=> 125,
-							'csbs' 	=> 166,	//college
-							'swrk' 	=> 132,
-							'soc' 	=> 126,
-							'sped' 	=> 127,
-							'som' 	=> 29,
-							'th' 	=> 129,
-							'univ' 	=> 130,	//need special case
-							'urbs' 	=> 131,
+							0	=> 'acct',
+							1	=> 'afric',
+							2	=> 'afrs',
+							3	=> 'ais',
+							4	=> 'anth',
+							5	=> 'art',
+							6	=> 'aas',
+							7	=> 'asian',
+							8	=> 'at',
+							9	=> 'biol',
+							10	=> 'gbus',
+							11	=> 'blaw',
+							12	=> 'calif',
+							13	=> 'cas',
+							14	=> 'chem',
+							15	=> 'chs',
+							16	=> 'cadv',
+							17	=> 'ctva',
+							18	=> 'cecm',
+							19	=> 'cd',
+							20	=> 'coms',
+							21	=> 'comp',
+							22	=> 'bus',	//college
+							23	=> 'deaf',
+							24	=> 'econ',
+							25	=> 'elps',
+							26	=> 'epc',
+							27	=> 'ece',
+							28	=> 'eed',
+							29	=> 'cecs',	//college
+							30	=> 'engl',
+							31	=> 'eoh',
+							32	=> 'fcs',
+							33	=> 'fin',
+							34	=> 'gws',
+							35	=> 'geog',
+							36	=> 'geol',
+							37	=> 'hhd',	//college
+							38	=> 'hsci',
+							39	=> 'hist',
+							40	=> 'humsex',
+							41	=> 'coh',	//college
+							42	=> 'huma',
+							43	=> 'js',
+							44	=> 'jour',
+							45	=> 'kin',
+							46	=> 'lrs',
+							47	=> 'ling',
+							48	=> 'mgt',
+							49	=> 'msem',
+							50	=> 'mkt',
+							51	=> 'math',
+							52	=> 'educ',	//college
+							53	=> 'meis',
+							54	=> 'amc',	//college
+							55	=> 'me',
+							56	=> 'mcll',
+							57	=> 'mus',
+							58	=> 'nurs',
+							59	=> 'phil',
+							60	=> 'pt',
+							61	=> 'phys',
+							62	=> 'pols',
+							63	=> 'psy',
+							64	=> 'mpa',
+							65	=> 'qs',
+							66	=> 'rtm',
+							67	=> 'rs',
+							68	=> 'csm',	//college
+							69	=> 'sed',
+							70	=> 'csbs',	//college
+							71	=> 'swrk',
+							72	=> 'soc',
+							73	=> 'sped',
+							74	=> 'som',
+							75	=> 'th',
+							76	=> 'univ',	//need special case
+							77	=> 'urbs',
 						),
 					'policies' => true
 				),
 		'policies' => array(
 					'title' => 'Policies',
 					'categories' => array(
-							'enrollment-regulations'			=> 134,
-							'fees' 								=> 139,
-							'privacy-and-student-information'	=> 157,
-							'nondiscrimination-policy' 			=> 158,
-							'student-conduct' 					=> 159,
-							'admission-procedures-and-policies' => 160,
-							'university-regulations' 			=> 161,
-							'other-policies' 					=> 162
+							0	=> 134,
+							1 	=> 139,
+							2	=> 157,
+							3 	=> 158,
+							4 	=> 159,
+							5 	=> 160,
+							6 	=> 161,
+							7 	=> 162
 						),
 				),
 		'faculty' => array('title' => 'Faculty and Administration'),

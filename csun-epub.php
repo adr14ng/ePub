@@ -21,3 +21,16 @@
 			return;
 	}
 	register_activation_hook(__FILE__, 'epub_activate');
+	
+	function epub_style($hook) 
+	{
+		if($hook !== "tools_page_epub-create")
+			return;
+		
+		$basedir = plugin_dir_url(__FILE__);
+		
+		wp_enqueue_style( 'epub-style', $basedir . 'style.css' );
+		wp_enqueue_script( 'jquery-ui', $basedir.'jquery-ui.min.js');
+		wp_enqueue_script( 'epub-script', $basedir.'script.js');
+	}
+	add_action( 'admin_enqueue_scripts', 'epub_style' );

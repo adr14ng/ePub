@@ -420,7 +420,7 @@ function print_policies($terms) {
  
  function print_graduate_page($page_id) {	
 
-	$page = get_post($page_id);
+	$page = get_post($page_id[0]);
 
 	if($page)
 	{

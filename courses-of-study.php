@@ -39,7 +39,7 @@ function courses_of_study($content) {
 	}
 	
 	//Programs of Study
-	foreach($content['categories'] as $slug => $id)
+	foreach($content['categories'] as $slug)
 	{
 		$sublinks = array();
 		ob_start();
