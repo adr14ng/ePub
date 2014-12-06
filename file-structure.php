@@ -20,8 +20,6 @@ function create_book($content, $options) {
 	//copy page-template.xpgt
 	copy('./book/OEBPS/page-template.xpgt' ,$book_dir.'/OEBPS/page-template.xpgt');
 	
-	epub_cover($options['cover']);
-	
 	//create container.xml
 	container();
 	//create content.opf
@@ -29,15 +27,6 @@ function create_book($content, $options) {
 	//create toc.ncx
 	tocNCX($files, $options);
 
-}
-
-function epub_cover($cover)
-{
-	global $book_dir;
-	if($cover === 'default')
-	{
-		copy('./book/OEBPS/images/cover.png', $book_dir.'/OEBPS/images/cover.png');
-	}
 }
 
 function contentOPF($contents, $options) {
@@ -54,6 +43,7 @@ function contentOPF($contents, $options) {
 			<dc:rights><?php echo $options['rights']; ?></dc:rights>
 			<dc:publisher><?php echo $options['publisher']; ?></dc:publisher>
 			<dc:identifier id="BookID" opf:scheme="UUID"><?php echo $options['bookid']; ?></dc:identifier>
+			<meta name="cover" content="cover-image" />
 		</metadata>
 		<manifest>
 			<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml" />
@@ -68,7 +58,7 @@ function contentOPF($contents, $options) {
 			<?php endforeach; endif; ?>
 		<?php endforeach; ?>
 			
-			<item id="cover-image" href="images/cover.png" media-type="image/png" /><!-- Update this sometime -->
+			<item id="cover-image" href="<?php echo $options['cover']; ?>" media-type="<?php echo $options['cover-type']; ?>" /><!-- Update this sometime -->
 		</manifest>
 		<spine toc="ncx">
 		<?php foreach($contents as $section) : ?>

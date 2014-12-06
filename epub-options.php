@@ -37,68 +37,86 @@
 	 */
 	public function epub_page()
 	{
+		$order = get_option('epub_order');
 	?>
 		<div class="wrap">
 			<h2>EPUB Creation</h2>
-			<form name="epub_options" action="<?php echo plugins_url().'/csun-epub/epub-process.php'; ?>" method="post" id="epub_options">
-				<?php wp_nonce_field('update_review_status'); ?>
+			<form enctype="multipart/form-data" name="epub_options" action="<?php echo plugins_url().'/csun-epub/epub-process.php'; ?>" method="post" id="epub_options">
+				<?php wp_nonce_field('epub-creation'); ?>
 				<input type="hidden" id="referredby" name="referredby" value="<?php echo esc_url(wp_get_referer()); ?>" />
 				<input type="hidden" name="return" value="<?php echo admin_url('tools.php?page=epub-create'); ?>" />
 				<input type="hidden" name="action" value="epub-creation" />
-				<input type="submit" name="default" value="default" class="btn btn-clear">
-				
+				<input type="submit" name="submit" value="Save" class="btn btn-clear">
 				<ul id="sortable">
-					<li class="ui-state-default"><?php $this->options_inputs(); ?></li>
-					<li class="ui-state-default"><?php $this->cover_inputs(); ?></li>
-					<li class="ui-state-default"><?php $this->title_input('Table of Contents', 'toc'); ?></li>
-					<li class="ui-state-default"><?php $this->page_inputs('CSUN', 'csun'); ?></li>
-					<li class="ui-state-default"><?php $this->undergrad_inputs(); ?></li>
-					<li class="ui-state-default"><?php $this->page_inputs('Student Services', 'student-services'); ?></li>
-					<li class="ui-state-default"><?php $this->page_inputs('Special Programs', 'special-programs'); ?></li>
-					<li class="ui-state-default"><?php $this->gened_inputs(); ?></li>
-					<li class="ui-state-default"><?php $this->grad_inputs(); ?></li>
-					<li class="ui-state-default"><?php $this->page_inputs('Credentials', 'credential'); ?></li>
-					<li class="ui-state-default"><?php $this->courses_input(); ?></li>
-					<li class="ui-state-default"><?php $this->policies_input(); ?></li>
-					<li class="ui-state-default"><?php $this->title_input('Faculty', 'faculty'); ?></li>
-					<li class="ui-state-default"><?php $this->title_input('Emeriti', 'emeriti'); ?></li>
+					<?php foreach($order as $item) : ?>
+						<?php if($item === "options"): ?>
+							<li class="ui-state-default"><?php $this->options_inputs(); ?></li>
+						<?php elseif($item === "cover"): ?>
+							<li class="ui-state-default"><?php $this->cover_inputs(); ?></li>
+						<?php elseif($item === "undergrad"): ?>
+							<li class="ui-state-default"><?php $this->undergrad_inputs(); ?></li>
+						<?php elseif($item === "gened"): ?>
+							<li class="ui-state-default"><?php $this->gened_inputs(); ?></li>
+						<?php elseif($item === "grad"): ?>
+							<li class="ui-state-default"><?php $this->grad_inputs(); ?></li>
+						<?php elseif($item === "courses"): ?>
+							<li class="ui-state-default"><?php $this->courses_input(); ?></li>
+						<?php elseif($item === "policies"): ?>
+							<li class="ui-state-default"><?php $this->policies_input(); ?></li>
+						<?php elseif($item === "toc" || $item === "faculty" || $item === "emeriti"): ?>
+							<li class="ui-state-default"><?php $this->title_input($item); ?></li>
+						<?php else: ?>
+							<li class="ui-state-default"><?php $lists[] = $this->page_inputs($item); ?></li>
+						<?php endif; ?>
+					<?php endforeach; ?>
 				</ul>
 				
 				<input type="submit" name="submit" value="Submit" class="btn btn-clear">
+				<input type="submit" name="submit" value="Save" class="btn btn-clear">
 			</form>
 		</div>
+		<script>
+			$j = jQuery.noConflict();
+			<?php foreach($lists as $item) : ?>
+				$j("#chose-<?php echo $item; ?>, #unchosen-<?php echo $item; ?>" ).sortable({
+					connectWith: ".<?php echo $item; ?>"
+				}).disableSelection();
+			<?php endforeach; ?>
+		</script>
 		
 	<?php
 	}
 	
 	public function options_inputs()
-	{ ?>
+	{ 
+		$options = get_option('epub_general');
+	?>
 		<section class="options">
 			<h3 class="options-title">ePub Options</h3>
 			<div class="options-inside clearfix">
 				<p><label for="options-title"> 
 					<span>Title: </span>
-					<input id="options-title" type="text" name="options[title]"/>
+					<input id="options-title" type="text" name="options[title]" value="<?php echo $options['title']; ?>" />
 				</label></p>
 				<p><label for="options-creator">
 					<span>Author: </span>
-					<input id="options-creator" type="text" name="options[creator]" />
+					<input id="options-creator" type="text" name="options[creator]" value="<?php echo $options['creator']; ?>" />
 				</label></p>
 				<p><label for="options-language">
 					<span>Language: </span>
-					<input id="options-language" type="text" name="options[language]" value="en-US" />
+					<input id="options-language" type="text" name="options[language]" value="<?php echo $options['language']; ?>" />
 				</label></p>
 				<p><label for="options-rights">
 					<span>Rights: </span>
-					<input id="options-rights" type="text" name="options[rights]" />
+					<input id="options-rights" type="text" name="options[rights]" value="<?php echo $options['rights']; ?>"/>
 				</label></p>
 				<p><label for="options-publisher">
 					<span>Publisher: </span>
-					<input id="options-publisher" type="text" name="options[publisher]" />
+					<input id="options-publisher" type="text" name="options[publisher]" value="<?php echo $options['publisher']; ?>" />
 				</label></p>
 				<p><label for="options-bookid">
 					<span>Unique Book ID: </span>
-					<input id="options-bookid" type="text" name="options[bookid]" />
+					<input id="options-bookid" type="text" name="options[bookid]" value="CSUN<?php echo mt_rand(); ?>" />
 				</label></p>
 			</div>
 		</section>
@@ -106,45 +124,59 @@
 	}
 	
 	public function cover_inputs()
-	{ ?>
+	{ 
+		$options = get_option('epub_cover');
+	?>
 		<section class="options">
 			<h3 class="options-title">Cover</h3>
 			<div class="options-inside clearfix">
 				<p><label for="cover-title"> 
 					<span>Title: </span>
-					<input id="cover-title" type="text" name="content[cover][title]" />
+					<input id="cover-title" type="text" name="content[cover][title]" value="<?php echo $options['title']; ?>" />
 				</label></p>
 				<p><label for="cover-file"> 
 					<span>File: </span>
-					<input id="cover-file" type="file" name="content[cover][image]" />
+					<input id="cover-file" type="file" name="cover-image" />
 				</label></p>
 			</div>
 		</section>
 <?php
 	}
 	
-	public function page_inputs($title, $file)
-	{ ?>
+	public function page_inputs($file)
+	{ 
+		$options = get_option('epub_'.$file);
+		$title = $options['title'];
+		$pages = $options['pages'];
+	?>
 		<section class="options">
 			<h3 class="options-title"><?php echo $title; ?></h3>
 			<div class="options-inside clearfix">
 				<p><label for="<?php echo $file; ?>-title"> 
 					<span>Title: </span>
-					<input id="<?php echo $file; ?>-title" type="text" name="content[<?php echo $file; ?>][title]" />
+					<input id="<?php echo $file; ?>-title" type="text" name="content[<?php echo $file; ?>][title]" value="<?php echo $title; ?>" />
 				</label></p>
 				<p><label for="<?php echo $file; ?>-pages">
 					<span class="list-box-title">Chosen Pages: </span>
 					<span class="list-box-title">Available Pages: </span>
 					<ul id="chose-<?php echo $file; ?>-page" class="chosen list-box <?php echo $file; ?>-page" name="content[<?php echo $file; ?>][pages][]">
+					<?php
+						foreach($pages as $id)
+						{
+							$page = get_post($id);
+							echo '<li class="list-option" id="'.$page->ID.'">'.$page->post_title.'</option></li>';
+						}
+					?>
 					</ul>
 					
 					<ul id="unchosen-<?php echo $file; ?>-page" class="list-box <?php echo $file; ?>-page">
 					<?php
-						$pages = get_pages();
+						$args = array('exclude' => $pages);
+						$other_pages = get_pages($args);
 						
-						foreach($pages as $page)
+						foreach($other_pages as $page)
 						{
-							echo '<li class="list-option" value="'.$page->ID.'">'.$page->post_title.'</option></li>';
+							echo '<li class="list-option" id="'.$page->ID.'">'.$page->post_title.'</option></li>';
 						}
 					?>
 					</ul>
@@ -152,41 +184,53 @@
 			</div>
 		</section>
 <?php
+		return $file.'-page';
 	}
 	
 	public function undergrad_inputs()
-	{ ?>
+	{ 
+		$options = get_option('epub_undergrad');
+		$df_pages = $options['pages'];
+	?>
 		<section class="options">
 			<h3 class="options-title">Undergraduate Programs</h3>
 			<div class="options-inside clearfix">
 				<p><label for="undergrad-title"> 
 					<span>Title: </span>
-					<input id="undergrad-title" type="text" name="content[undergrad][title]" />
+					<input id="undergrad-title" type="text" name="content[undergrad][title]" value="<?php echo $options['title']; ?>" />
 				</label></p>
 				<p><label for="undergrad-pages">
 					<span class="list-box-title">Chosen Pages: </span>
 					<span class="list-box-title">Available Pages: </span>
 					<ul id="chose-undergrad-page" class="chosen list-box undergrad-page" name="content[undergrad][pages][]">
+					<?php
+						foreach($df_pages as $id)
+						{
+							$page = get_post($id);
+							echo '<li class="list-option" id="'.$page->ID.'">'.$page->post_title.'</option></li>';
+						}
+					?>
 					</ul>
 					
 					<ul id="unchosen-undergrad-page" class="list-box undergrad-page">
 					<?php
-						$pages = get_pages();
+						$args = array('exclude' => $df_pages);
+						$pages = get_pages($args);
 						
 						foreach($pages as $page)
 						{
-							echo '<li class="list-option" value="'.$page->ID.'">'.$page->post_title.'</option></li>';
+							echo '<li class="list-option" id="'.$page->ID.'">'.$page->post_title.'</option></li>';
 						}
 					?>
 					</ul>
 				</label></p>
 				<p><label for="undergrad-policies"> 
 					<span>Undergraduate Policies: </span>
-					<input id="undergrad-policies" type="checkbox" name="content[undergrad][policies]" />
+					<input id="undergrad-policies" type="checkbox" name="content[undergrad][policies]" <? if(isset($options['proglist'])) echo 'checked'; ?> />
 				</label></p>
 				<p><label for="undergrad-proglist"> 
 					<span>List Programs: </span>
-					<input id="proglist-title" type="checkbox" name="content[undergrad][proglist]" />
+					<input id="proglist-title" type="checkbox" name="content[undergrad][proglist]" <? if(isset($options['proglist'])) echo 'checked'; ?> />
 				</label></p>
 			</div>
 		</section>
@@ -194,42 +238,53 @@
 	}
 	
 	public function gened_inputs()
-	{ ?>
+	{ 
+		$options = get_option('epub_gened');
+		$df_pages = $options['pages'];
+	?>
 		<section class="options">
 			<h3 class="options-title">General Education</h3>
 			<div class="options-inside clearfix">
 				<p><label for="ge-title"> 
 					<span>Title: </span>
-					<input id="ge-title" type="text" name="content[gened][title]" />
+					<input id="ge-title" type="text" name="content[gened][title]" value="<?php echo $options['title']; ?>" />
 				</label></p>
 				<p><label for="ge-pages">
 					<span class="list-box-title">Chosen Pages: </span>
 					<span class="list-box-title">Available Pages: </span>
 					<ul id="chose-gened-page" class="chosen list-box gened-page" name="content[gened][pages][]">
+					<?php
+						foreach($df_pages as $id)
+						{
+							$page = get_post($id);
+							echo '<li class="list-option" id="'.$page->ID.'">'.$page->post_title.'</option></li>';
+						}
+					?>
 					</ul>
 					
 					<ul id="unchosen-gened-page" class="list-box gened-page">
 					<?php
-						$pages = get_pages();
+						$args = array('exclude' => $df_pages);
+						$pages = get_pages($args);
 						
 						foreach($pages as $page)
 						{
-							echo '<li class="list-option" value="'.$page->ID.'">'.$page->post_title.'</option></li>';
+							echo '<li class="list-option" id="'.$page->ID.'">'.$page->post_title.'</option></li>';
 						}
 					?>
 					</ul>
 				</label></p>
 				<p><label for="ge-category"> 
 					<span>List Courses: </span>
-					<input id="ge-category" type="checkbox" name="content[gened][category]" />
+					<input id="ge-category" type="checkbox" name="content[gened][category]" <? if(isset($options['category'])) echo 'checked'; ?> />
 				</label></p>
 				<p><label for="ge-upper"> 
 					<span>Upper Division List: </span>
-					<input id="ge-upper" type="checkbox" name="content[gened][upper]" />
+					<input id="ge-upper" type="checkbox" name="content[gened][upper]" <? if(isset($options['upper'])) echo 'checked'; ?> />
 				</label></p>
 				<p><label for="ge-ic"> 
 					<span>Information Competence List: </span>
-					<input id="ge-ic" type="checkbox" name="content[gened][ic]" />
+					<input id="ge-ic" type="checkbox" name="content[gened][ic]" <? if(isset($options['ic'])) echo 'checked'; ?> />
 				</label></p>
 			</div>
 		</section>
@@ -237,38 +292,49 @@
 	}
 	
 	public function grad_inputs()
-	{ ?>
+	{ 
+		$options = get_option('epub_grad');
+		$df_pages = $options['pages'];
+	?>
 		<section class="options">
 			<h3 class="options-title">Graduate Studies</h3>
 			<div class="options-inside clearfix">
 				<p><label for="grad-title"> 
 					<span>Title: </span>
-					<input id="grad-title" type="text" name="content[grad][title]" />
+					<input id="grad-title" type="text" name="content[grad][title]" value="<?php echo $options['title']; ?>" />
 				</label></p>
 				<p><label for="grad-pages"> 
 					<span class="list-box-title">Chosen Pages: </span>
 					<span class="list-box-title">Available Pages: </span>
 					<ul id="chose-grad-page" class="chosen list-box grad-page" name="content[grad][pages][]">
+					<?php
+						foreach($df_pages as $id)
+						{
+							$page = get_post($id);
+							echo '<li class="list-option" id="'.$page->ID.'">'.$page->post_title.'</option></li>';
+						}
+					?>
 					</ul>
 					
 					<ul id="unchosen-grad-page" class="list-box grad-page">
 					<?php
-						$pages = get_pages();
+						$args = array('exclude' => $df_pages);
+						$pages = get_pages($args);
 						
 						foreach($pages as $page)
 						{
-							echo '<li class="list-option" value="'.$page->ID.'">'.$page->post_title.'</option></li>';
+							echo '<li class="list-option" id="'.$page->ID.'">'.$page->post_title.'</option></li>';
 						}
 					?>
 					</ul>
 				</label></p>
 				<p><label for="grad-prog"> 
 					<span>List Programs: </span>
-					<input id="grad-prog" type="checkbox" name="content[grad][proglist]" />
+					<input id="grad-prog" type="checkbox" name="content[grad][proglist]" <? if(isset($options['proglist'])) echo 'checked'; ?> />
 				</label></p>
 				<p><label for="grad-cert"> 
 					<span>List Certificates: </span>
-					<input id="grad-cert" type="checkbox" name="content[grad][certlist]" />
+					<input id="grad-cert" type="checkbox" name="content[grad][certlist]" <? if(isset($options['certlist'])) echo 'checked'; ?> />
 				</label></p>
 			</div>
 		</section>
@@ -276,35 +342,48 @@
 	}
 	
 	public function courses_input()
-	{ ?>
+	{ 
+		$options = get_option('epub_courses');
+		$depts = $options['categories'];
+	?>
 		<section class="options">
 			<h3 class="options-title">Courses of Study</h3>
 			<div class="options-inside clearfix">
-				<p><label for="study-title"> 
+				<p><label for="courses-title"> 
 					<span>Title: </span>
-					<input id="study-title" type="text" name="content[study][title]" />
+					<input id="courses-title" type="text" name="content[courses][title]" value="<?php echo $options['title']; ?>" />
 				</label></p>
-				<p><label for="study-list"> 
+				<p><label for="courses-list"> 
 					<span>Table of Content Title: </span>
-					<input id= "study-list" type="text" name="content[study][listTitle]" />
+					<input id= "courses-list" type="text" name="content[courses][listTitle]" value="Colleges, Departments and Programs" />
 				</label></p>
-				<p><label for="study-policies"> 
+				<p><label for="courses-policies"> 
 					<span>Course Policies: </span>
-					<input id="study-policies" type="checkbox" name="content[study][policies]" />
+					<input id="courses-policies" type="checkbox" name="content[courses][policies]" <? if(isset($options['policies'])) echo 'checked'; ?> />
 				</label></p>
-				<p><label for="study-cats"> 
+				<p><label for="courses-cats"> 
 					<span class="list-box-title">Chosen Departments: </span>
 					<span class="list-box-title">Available Departments: </span>
-					<ul id="chose-dept-cat" class="chosen list-box dept-cats" name="content[study][categories][]">
+					<ul id="chose-dept-cat" class="chosen list-box dept-cats" name="content[courses][categories][]">
+					<?php
+						foreach($depts as $dept)
+						{
+							$term = get_term_by('slug', $dept, 'department_shortname');
+							echo '<li class="list-option" id="'.$term->slug.'">'.$term->description.'</option></li>';
+							
+							$exclude[] = $term->term_id;
+						}
+					?>
 					</ul>
 					
 					<ul id="unchosen-dept-cat" class="list-box dept-cats">
 					<?php
-						$terms = get_terms('department_shortname');
+						$args = array('exclude' => $exclude, 'exclude_tree' => 511); 
+						$terms = get_terms('department_shortname', $args);
 						
 						foreach($terms as $term)
 						{
-							echo '<li class="list-option" value="'.$term->slug.'">'.$term->description.'</option></li>';
+							echo '<li class="list-option" id="'.$term->slug.'">'.$term->description.'</option></li>';
 						}
 					?>
 					</ul>
@@ -315,27 +394,39 @@
 	}
 	
 	public function policies_input()
-	{ ?>
+	{ 
+		$options = get_option('epub_policies');
+		$cats = $options['categories'];
+		
+	?>
 		<section class="options">
 			<h3 class="options-title">Policies</h3>
 			<div class="options-inside clearfix">
 				<p><label for="policies-title">
 					<span>Title: </span>
-					<input id="policies-title" type="text" name="content[policies][title]" />
+					<input id="policies-title" type="text" name="content[policies][title]" value="<?php echo $options['title']; ?>" />
 				</label></p>
 				<p><label for="policies-cat">
 					<span class="list-box-title">Chosen Policy Categories: </span>
 					<span class="list-box-title">Available Policy Categories: </span>
 					<ul id="chose-pol-cat" class="chosen list-box pol-cats" name="content[policies][categories][]">
+					<?php
+						foreach($cats as $cat)
+						{
+							$term = get_term($cat, 'policy_categories');
+							echo '<li class="list-option" id="'.$term->term_id.'">'.$term->name.'</option></li>';
+						}
+					?>
 					</ul>
 					
 					<ul id="unchosen-pol-cat" class="list-box pol-cats">
 					<?php
-						$terms = get_terms('policy_categories');
+						$args = array('exclude' => $cats);
+						$terms = get_terms('policy_categories', $args);
 						
 						foreach($terms as $term)
 						{
-							echo '<li class="list-option" value="'.$term->term_id.'">'.$term->name.'</option></li>';
+							echo '<li class="list-option" id="'.$term->term_id.'">'.$term->name.'</option></li>';
 						}
 					?>
 					</ul>
@@ -346,14 +437,17 @@
 <?php
 	}
 	
-	public function title_input($title, $type)
-	{ ?>
+	public function title_input($type)
+	{ 
+		$options = get_option('epub_'.$type);
+		$title = $options['title'];
+	?>
 		<section class="options">
 			<h3 class="options-title"><?php echo $title; ?></h3>
 			<div class="options-inside clearfix">
 				<p><label for="<?php echo $type; ?>-title"> 
 					<span>Title: </span>
-					<input id="<?php echo $type; ?>-title" type="text" name="content[<?php echo $type; ?>][title]" />
+					<input id="<?php echo $type; ?>-title" type="text" name="content[<?php echo $type; ?>][title]" value="<?php echo $title; ?>" />
 				</label></p>
 			</div>
 		</section>

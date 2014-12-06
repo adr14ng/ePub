@@ -31,7 +31,7 @@ function print_content($content) {
 		if($type === 'cover')
 		{
 			print_header($title, false);
-			cover();
+			cover($section);
 			print_footer();
 		}
 		//Table of Contents
@@ -124,7 +124,7 @@ function print_content($content) {
 			print_footer();
 		}
 		//Courses of Study
-		else if($type === 'study')
+		else if($type === 'courses')
 		{
 			$file_names[$index]['subpages'] = courses_of_study($section);
 			
@@ -212,13 +212,13 @@ function print_footer() { ?>
 </html>
 <?php }
 
-function cover() {
-echo <<<COV
+function cover($section) {
+?>
 	<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
 		width="100%" height="100%" viewBox="0 0 573 800" preserveAspectRatio="xMidYMid meet">
-		<image width="600" height="800" xlink:href="./images/cover.png" />
+		<image width="600" height="800" xlink:href="./<?php echo $section['image']; ?>" />
 	</svg>
-COV;
+<?php
 }
 
 function print_pages($pages, $base_class = '') {	
@@ -380,8 +380,9 @@ function print_policies($terms) {
 			$term = get_term($id, 'policy_categories');			
 			$query_policies = new WP_Query(array(
 				'post_type' => 'policies', 
-				'orderby' => 'title', 
-				'order' => 'ASC',  
+				'meta_key' => 'pol_rank',
+				'orderby' => 'meta_value_num title', 
+				'order' => 'ASC', 
 				'policy_categories' => $term->slug, 
 				'posts_per_page' => 1000,));
 								
@@ -454,8 +455,9 @@ function print_policies($terms) {
 	global $post;
 	
 	$query_policies = new WP_Query(array(
-		'orderby' => 'name', 
-		'order' => 'ASC',  
+		'meta_key' => 'pol_rank',
+		'orderby' => 'meta_value_num title', 
+		'order' => 'ASC', 
 		'policy_tags' => 'graduate',
 		'post_type' => 'policies',
 		'posts_per_page' => 1000,));
@@ -684,7 +686,8 @@ function undergrad_policies(){
 	global $post;
 	
 	$query_policies = new WP_Query(array(
-		'orderby' => 'name', 
+		'meta_key' => 'pol_rank',
+		'orderby' => 'meta_value_num title', 
 		'order' => 'ASC',  
 		'policy_tags' => 'undergrad',
 		'post_type' => 'policies',

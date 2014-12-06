@@ -19,12 +19,12 @@
 	list-style-type: none; 
 	margin: 0; 
 	padding: 0; 
-	width: 40%; 
+	max-width: 670px; 
 }
 
 .list-box-title {
 	float: left;
-	width: 45%;
+	width: 47%;
 	margin-left: 15px;
 	font-weight: bold;
 }
@@ -35,8 +35,10 @@ ul.list-box {
 	float: left;
 	margin-right: 10px;
 	padding: 5px;
-	width:45%;
+	width:46%;
 	min-height: 20px;
+	max-height: 200px;
+	overflow: auto;
 }
 
 .list-box li {

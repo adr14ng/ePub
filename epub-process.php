@@ -10,7 +10,7 @@ $book_dir = $base_url.'/wp-content/uploads/epub';
 
 if(isset($_POST['action']) && $_POST['action'] == 'epub-creation')
 {
-	//check_admin_referer('epub-creation');
+	check_admin_referer('epub-creation');
 	
 	$plug_in_dir = dirname(__FILE__);
 
@@ -24,49 +24,49 @@ if(isset($_POST['action']) && $_POST['action'] == 'epub-creation')
 	require_once $plug_in_dir . '/courses-of-study.php';
 	require_once $plug_in_dir . '/content.php';
 	
-	list($df_content, $df_options) = default_values();
-	
-	if(isset($_POST['default']))
+	if(isset($_POST['submit']) && $_POST['submit'] === 'Submit')
 	{
-		set_time_limit(300);
+		epub_save_options();
 		
-		$dir = sanitize_file_name($df_options['title']);
-		$zip_file = $book_dir.'/'.$dir.'.epub';
-		$book_dir .= '/'.$dir;
-		
-		echo $book_dir;
-		
-		mkdir($book_dir, 0775, true);
-		create_book($df_content, $df_options);
-	}
-	else
-	{
-		print_r($_POST);
-		return;
-		/*
-		$options = array_intersect_key($_POST['options'], $df_options);
-		array_merge($df_options, $options);
-
+		$options = $_POST['options'];
 		$dir = sanitize_file_name($options['title']);
 		$zip_file = $book_dir.'/'.$dir.'.epub';
 		$book_dir .= '/'.$dir;
 
 		mkdir($book_dir, 0775, true);
+		
+		
+		if(isset($_FILES['cover-image']) && (stripos($_FILES['cover-image']['type'], 'image') !== FALSE))
+		{
+			mkdir($book_dir.'/OEBPS/images', 0775, true);
+			$image = explode('.', $_FILES['cover-image']['name']);
+			$cover_image = 'images/cover.'.$image[1];
+			if(move_uploaded_file($_FILES['cover-image']['tmp_name'], $book_dir.'/OEBPS/'.$cover_image))
+			{
+				$_POST['content']['cover']['image'] = $cover_image;
+				$options['cover'] = $cover_image;
+				$options['cover-type'] = $_FILES['cover-image']['type'];
+			}
+		}
+		
 		create_book($_POST['content'], $options);
-		*/
+		
+		create_archive($zip_file);
+		
+		header("Content-disposition: attachment; filename=".$dir.".epub");
+		header("Content-type: application/epub+zip");
+		readfile($zip_file);
 	}
-
-	
-	create_archive($zip_file);
-	
-	header("Content-disposition: attachment; filename=".$dir.".epub");
-	header("Content-type: application/epub+zip");
-	readfile($zip_file);
+	elseif(isset($_POST['submit']) && $_POST['submit'] === 'Save')
+	{
+		epub_save_options();
+	}
 	
 	if(isset($_POST['return']))
-		wp_redirect( $_POST['return'] );
+		wp_safe_redirect( $_POST['return'] );
 	else
 		wp_redirect( admin_url() );
+		
 }
 
 function create_archive($epubFile)
@@ -105,192 +105,69 @@ function create_archive($epubFile)
 	rename($zipFile, $epubFile);
 }
 
-
-function default_values() {
-
-	$content = array(
-		'cover' => array( 'title' => 'University Catalog'),
-		'toc' => array('title' => "Table of Contents"),
-		'csun' => array(
-					'title' => "CSUN",
-					'pages' => array(
-							0 	=> 29206,
-							1 	=> 29208,
-							//2 => , academic calendar
-							3 	=> 27367,
-							4 	=> 27377,
-							5 	=> 27378,
-							6 	=> 27382,
-							7 	=> 29210,
-							8 	=> 29212,
-							9 	=> 29221,
-							10 	=> 29223,
-							11 	=> 35172
-						),
-				),
-		'undergrad' => array(
-					'title' => 'Undergraduate Programs',
-					'pages' => array(
-							0 	=> 29215,
-							1 	=> 32736,
-							2 	=> 29227,
-							3 	=> 34971,
-							4 	=> 34967,
-							5 	=> 29225,
-						),
-					'policies' => true,
-					'proglist' => true
-				),
-		'student-services' => array(
-					'title' => 'Student Services',
-					'pages' => array(
-							0 	=> 29219
-						),
-				),
-		'special-programs' => array(
-					'title' => 'Special Programs',
-					'pages' => array(
-							0 	=> 29229
-						),
-				),
-		'gened' => array(
-					'title'	=> 'General Education',
-					'pages' => array(
-							0 	=> 28561,
-							1 	=> 29162,
-							2 	=> 29160
-						),
-					'category' => true,
-					'upper' => true,
-					'ic' => true
-				),
-		'grad' => array(
-					'title' => 'Research and Graduate Studies',
-					'pages' => array(
-							0	=> 186
-						),
-					'proglist' => true,
-					'certlist' => 28943,
-				),
-		'credential' => array(
-					'title' => 'Credential Office',
-					'pages' => array(
-							0 	=> 28825
-						),
-				),
-		'study' => array(
-					'title' => 'Courses of Study',
-					'listTitle' => 'Colleges, Departments and Programs',
-					'categories' => array(
-							0	=> 'acct',
-							1	=> 'afric',
-							2	=> 'afrs',
-							3	=> 'ais',
-							4	=> 'anth',
-							5	=> 'art',
-							6	=> 'aas',
-							7	=> 'asian',
-							8	=> 'at',
-							9	=> 'biol',
-							10	=> 'gbus',
-							11	=> 'blaw',
-							12	=> 'calif',
-							13	=> 'cas',
-							14	=> 'chem',
-							15	=> 'chs',
-							16	=> 'cadv',
-							17	=> 'ctva',
-							18	=> 'cecm',
-							19	=> 'cd',
-							20	=> 'coms',
-							21	=> 'comp',
-							22	=> 'bus',	//college
-							23	=> 'deaf',
-							24	=> 'econ',
-							25	=> 'elps',
-							26	=> 'epc',
-							27	=> 'ece',
-							28	=> 'eed',
-							29	=> 'cecs',	//college
-							30	=> 'engl',
-							31	=> 'eoh',
-							32	=> 'fcs',
-							33	=> 'fin',
-							34	=> 'gws',
-							35	=> 'geog',
-							36	=> 'geol',
-							37	=> 'hhd',	//college
-							38	=> 'hsci',
-							39	=> 'hist',
-							40	=> 'humsex',
-							41	=> 'coh',	//college
-							42	=> 'huma',
-							43	=> 'js',
-							44	=> 'jour',
-							45	=> 'kin',
-							46	=> 'lrs',
-							47	=> 'ling',
-							48	=> 'mgt',
-							49	=> 'msem',
-							50	=> 'mkt',
-							51	=> 'math',
-							52	=> 'educ',	//college
-							53	=> 'meis',
-							54	=> 'amc',	//college
-							55	=> 'me',
-							56	=> 'mcll',
-							57	=> 'mus',
-							58	=> 'nurs',
-							59	=> 'phil',
-							60	=> 'pt',
-							61	=> 'phys',
-							62	=> 'pols',
-							63	=> 'psy',
-							64	=> 'mpa',
-							65	=> 'qs',
-							66	=> 'rtm',
-							67	=> 'rs',
-							68	=> 'csm',	//college
-							69	=> 'sed',
-							70	=> 'csbs',	//college
-							71	=> 'swrk',
-							72	=> 'soc',
-							73	=> 'sped',
-							74	=> 'som',
-							75	=> 'th',
-							76	=> 'univ',	//need special case
-							77	=> 'urbs',
-						),
-					'policies' => true
-				),
-		'policies' => array(
-					'title' => 'Policies',
-					'categories' => array(
-							0	=> 134,
-							1 	=> 139,
-							2	=> 157,
-							3 	=> 158,
-							4 	=> 159,
-							5 	=> 160,
-							6 	=> 161,
-							7 	=> 162
-						),
-				),
-		'faculty' => array('title' => 'Faculty and Administration'),
-		'emeriti'  => array('title' => "Emeriti"),
-	);
+function epub_save_options()
+{
+	$options = $_POST['options'];
+	$content = $_POST['content'];
 	
-	$options = array(
-		'title' => 'CSUN Catalog',
-		'creator' => 'Undergraduate Studies',
-		'language' => 'en-US',
-		'rights' => '',
-		'publisher' => 'California State University, Northridge',
-		'bookid' => '20142015CSUN',
-		'cover' => 'default',
-	);
-		
-	return array($content, $options);
+	$options = epub_sanitize_options('options', $options);
+	update_option('epub_general', $options);
+	$order[] = 'options';
+	
+	foreach($content as $key => $item)
+	{
+		$key = sanitize_key($key);
+		$item = epub_sanitize_options($key, $item);
+		update_option('epub_'.$key, $item);
+		$order[] = $key;
+	}
+	
+	update_option('epub_order', $order);
+	
+	return array($options, $content);
+}
+
+function epub_sanitize_options($key, $item)
+{
+	foreach($item as $k => $v)
+	{
+		$k = sanitize_key($k);
+		if($k === 'categories' && $key === 'courses')
+		{
+			$safe[$k] = epub_sanitize_cats($v);
+		}
+		elseif($k === 'pages' || $k === 'categories' )
+		{
+			$safe[$k] = epub_sanitize_ids($v);
+		}
+		else
+		{
+			$safe[$k] = sanitize_text_field($v);
+		}
+	}
+
+	return $safe;
+}
+
+function epub_sanitize_cats($content)
+{
+	//ignore keys, we just want the order
+	foreach($content as $v)
+	{
+		$safe[] = sanitize_title($v);
+	}
+
+	return $safe;
+}
+
+function epub_sanitize_ids($content)
+{
+	foreach($content as $v)
+	{
+		$safe[] = (int)$v;
+	}
+
+	return $safe;
 }
 
 function filter_tags($content)

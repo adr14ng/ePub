@@ -18,7 +18,7 @@ $j( document ).ready(function() {
 	}).disableSelection();
 	
 	$j("#chose-gened-page, #unchosen-gened-page" ).sortable({
-		connectWith: ".ened-page"
+		connectWith: ".gened-page"
 	}).disableSelection();
 	
 	$j("#chose-undergrad-page, #unchosen-undergrad-page" ).sortable({
@@ -28,7 +28,7 @@ $j( document ).ready(function() {
 	$j('#epub_options').submit(function() {
 		
 		$j('.list-option').each(function() {
-			var value = $j(this).attr('value');
+			var value = $j(this).attr('id');
 			var option = '<option selected value="'+value+'">'+this.innerHTML+'</option>';
 			$j(this).replaceWith(option);
 		});
