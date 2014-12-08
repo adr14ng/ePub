@@ -209,8 +209,7 @@ function print_courses($dept) {
 
 function print_programs($dept) {
 	echo '<div class="programs course-of-study">';
-	$levels = array('major', 'honor', 'minor', 'master', 'doctorate', 'credential', 'credential', 'certificate', 'other');
-	$authorizations = false;
+	$levels = array('major', 'honor', 'minor', 'master', 'doctorate', 'credential', 'authorization', 'certificate', 'other');
 		
 	foreach($levels as $level) : 
 	
@@ -221,18 +220,9 @@ function print_programs($dept) {
 			'department_shortname' => $dept,
 			'posts_per_page' => 1000,));
 				
-		if($query_programs->have_posts()) :
-			while($query_programs->have_posts()) : $query_programs->the_post();
-				$degree = get_field('degree_type');
-				if($level !== "credential" || ((!$authorizations && ($degree === 'credential' || $degree === 'Credential')) ||
-						($authorizations && ($degree === 'authorization' || $degree === 'Authorization')))) :
-					$sublinks[] = print_program();
-				endif;
-			endwhile; 
-		endif;
-		
-		if($level === "credential") 
-			$authorizations = true;
+		if($query_programs->have_posts()) : while($query_programs->have_posts()) : $query_programs->the_post();
+			$sublinks[] = print_program();
+		endwhile; endif;
 		
 	endforeach;
 	
@@ -284,8 +274,7 @@ function print_program_list($dept, $college = false) {
 	<div class="program-list course-of-study">
 		<h3>Programs</h3>
 		<?php 
-		$levels = array('major', 'honor', 'minor', 'master', 'doctorate', 'credential', 'credential', 'certificate', 'other');
-		$authorizations = false;
+		$levels = array('major', 'honor', 'minor', 'master', 'doctorate', 'credential', 'authorization', 'certificate', 'other');
 		
 		foreach($levels as $level) { 
 		
@@ -306,31 +295,26 @@ function print_program_list($dept, $college = false) {
 				{
 					echo '<h4>Graduate</h4> ';
 				}
-				elseif( ($level === 'credential' && !$authorizations) || $level === 'certificate')
+				elseif( ($level === 'credential') || $level === 'certificate')
 				{
 					echo '<h4>'.ucwords($level).'</h4> ';
 				}
 				
 				echo '<ul class="program-list">';
 				while($query_programs->have_posts()) { $query_programs->the_post();
-					$degree = get_field('degree_type');
-					
-					if(($level !== "credential" || ((!$authorizations) && ($degree === 'credential' || $degree === 'Credential'))) ||
-						($level === "credential" && ($degree === 'authorization' || $degree === 'Authorization') && $authorizations) ) {
 						
-						$program_title = get_program_name();
+					$program_title = get_program_name();
 
-						$post_option=get_field('option_title');
-						if(isset($post_option)&&$post_option!=='')
-							$program_title = $program_title.' - '.$post_option.' Option';
-							
-						if($college)
-							$link = get_program_file($post->ID).'#'.$post->post_name;
-						else
-							$link = '#'.$post->post_name;
-							
-						echo '<li><a href="'.$link.'">'.$program_title.'</a></li>';
-					}
+					$post_option=get_field('option_title');
+					if(isset($post_option)&&$post_option!=='')
+						$program_title = $program_title.' - '.$post_option.' Option';
+						
+					if($college)							
+						$link = get_program_file($post->ID).'#'.$post->post_name;
+					else
+						$link = '#'.$post->post_name;
+						
+					echo '<li><a href="'.$link.'">'.$program_title.'</a></li>';
 				}
 				echo '</ul>';
 			}

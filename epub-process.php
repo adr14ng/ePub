@@ -105,38 +105,45 @@ function create_archive($epubFile)
 	rename($zipFile, $epubFile);
 }
 
+/**
+ *	Saves the configuration of the ePub for the next creation.
+ */
 function epub_save_options()
 {
+	//the two arrays we have are options and content
 	$options = $_POST['options'];
 	$content = $_POST['content'];
 	
+	//options has its own entry in the database
 	$options = epub_sanitize_options('options', $options);
 	update_option('epub_general', $options);
-	$order[] = 'options';
+	$order[] = 'options';		//options will always be first
 	
+	//each level under content has it's own entry in the database
 	foreach($content as $key => $item)
 	{
 		$key = sanitize_key($key);
 		$item = epub_sanitize_options($key, $item);
 		update_option('epub_'.$key, $item);
-		$order[] = $key;
+		$order[] = $key;		//keep track of the order of the content
 	}
 	
 	update_option('epub_order', $order);
-	
-	return array($options, $content);
 }
 
+/**
+ *	Sanitizes an option array before entering it into the database
+ */
 function epub_sanitize_options($key, $item)
 {
 	foreach($item as $k => $v)
 	{
 		$k = sanitize_key($k);
-		if($k === 'categories' && $key === 'courses')
+		if($k === 'categories' && $key === 'courses')		//array of depts
 		{
 			$safe[$k] = epub_sanitize_cats($v);
 		}
-		elseif($k === 'pages' || $k === 'categories' )
+		elseif($k === 'pages' || $k === 'categories' )		//array of ids
 		{
 			$safe[$k] = epub_sanitize_ids($v);
 		}
@@ -149,6 +156,9 @@ function epub_sanitize_options($key, $item)
 	return $safe;
 }
 
+/**
+ *	Ensures that the dept slug array is sanitized
+ */
 function epub_sanitize_cats($content)
 {
 	//ignore keys, we just want the order
@@ -160,6 +170,9 @@ function epub_sanitize_cats($content)
 	return $safe;
 }
 
+/**
+ *	Ensures that the page id array is sanitized
+ */
 function epub_sanitize_ids($content)
 {
 	foreach($content as $v)
@@ -170,6 +183,9 @@ function epub_sanitize_ids($content)
 	return $safe;
 }
 
+/**
+ *	Filter out tags/entities that cause problems in XHTML
+ */
 function filter_tags($content)
 {
 	//remove space things
@@ -211,12 +227,21 @@ function filter_tags($content)
 	return $content;
 }
 
+/**
+ *	Add filters to ACFs
+ */
 function filter_acf_tags($value, $post_id, $field)
 {
 	$value = apply_filters('the_content',$value);
 	return $value;
 }
 
+/**
+ *	Reduces header levels to below the level indicated 
+ *	(e.g. if level=2, the highest header will be H3)
+ *  This method keeps the relative header levels unless
+ *	it drops below H6.
+ */
 function lower_headings($content, $level)
 {
 	$heading = h.$level;
@@ -239,11 +264,20 @@ function lower_headings($content, $level)
 	return $content;
 }
 
+/**
+ *	Removes headers with the extra-header class. Ensures
+ *  certain headers that are printed twice on the website
+ *	aren't in the book.
+ */
 function clear_double_headings($content){
 	$content = preg_replace('/<[^>]*extra-header[^>]*>[\s\S]*?<[^>]*>/i', '', $content);
 	return $content;
 }
 
+/**
+ *	Adds IDs to H2s if the do not already have one.
+ *  These IDs can be used to create sublinks.
+ */
 function add_ids($content) {
 	//ensure h2's have ids
 	$content = preg_replace_callback(
@@ -257,6 +291,10 @@ function add_ids($content) {
 	return $content;
 }
 
+/**
+ *	Locates H2's and their id and creates a link item
+ *	based on this information for use in TOC methods
+ */
 function get_sublinks($content) {		
 	//get the ids of the h2s
 	preg_match_all( '/<h2 id="([^"]*)"([^>]*)>(.*?)<\/h2>/i', $content, $out, PREG_SET_ORDER);
