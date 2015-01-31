@@ -30,7 +30,8 @@ if(isset($_POST['action']) && $_POST['action'] == 'epub-creation')
 		
 		$options = $_POST['options'];
 		$dir = sanitize_file_name($options['title']);
-		$zip_file = $book_dir.'/'.$dir.'.epub';
+		$name = $dir.'.epub';
+		$zip_file = $book_dir.'/'.$name;
 		$book_dir .= '/'.$dir;
 
 		mkdir($book_dir, 0775, true);
@@ -53,9 +54,9 @@ if(isset($_POST['action']) && $_POST['action'] == 'epub-creation')
 		
 		create_archive($zip_file);
 		
-		header("Content-disposition: attachment; filename=".$dir.".epub");
-		header("Content-type: application/epub+zip");
-		readfile($zip_file);
+		send_file($zip_file, $name);
+		
+		exit();
 	}
 	elseif(isset($_POST['submit']) && $_POST['submit'] === 'Save')
 	{
@@ -66,7 +67,7 @@ if(isset($_POST['action']) && $_POST['action'] == 'epub-creation')
 		wp_safe_redirect( $_POST['return'] );
 	else
 		wp_redirect( admin_url() );
-		
+
 }
 
 function create_archive($epubFile)
@@ -103,6 +104,37 @@ function create_archive($epubFile)
 	$zip->close();
 	
 	rename($zipFile, $epubFile);
+}
+
+function send_file( $file, $name )
+{
+	if ( !is_file( $file ) )
+	{
+		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+		exit;
+	}
+	elseif ( !is_readable( $file ) )
+	{
+		header($_SERVER['SERVER_PROTOCOL'].' 403 Forbidden');
+		exit;
+	}
+	else
+	{
+		header($_SERVER['SERVER_PROTOCOL'].' 200 OK');
+		header("Pragma: public");
+		header("Expires: 0");
+		header("Accept-Ranges: bytes");
+		header("Connection: keep-alive");
+		header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+		header("Cache-Control: public");
+		header("Content-type: application/epub+zip");
+		header("Content-Description: File Transfer");
+		header("Content-Disposition: attachment; filename=\"$name\"");
+		header('Content-Length: '.filesize($file));
+		header("Content-Transfer-Encoding: binary");
+		ob_end_clean(); //Fix to solve "corrupted compressed file" error
+		readfile($file);
+	}
 }
 
 /**

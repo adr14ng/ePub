@@ -3,6 +3,13 @@
 //get all the departments we want
 //if a college get college page
 
+/**
+ *	Creates the files for all courses of study.
+ *
+ *  @param	array	$content	An array of settings determining content
+ *	@return	array	The filenames and titles for linking
+ *	@return	array	The filenames and titles for linking
+ */
 function courses_of_study($content) {
 	$colleges = array('cecs', 'hhd', 'coh', 'educ', 'amc', 'csbs', 'csm');
 	global $book_dir;
@@ -17,7 +24,7 @@ function courses_of_study($content) {
 	//Course Policies
 	if(isset($content['policies']) && $content['policies']) {
 		$title = 'Course Policies';
-		ob_start();
+		ob_start();							//output buffer
 		
 		print_header($title);
 		$sublinks = course_policies();

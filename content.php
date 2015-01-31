@@ -43,7 +43,7 @@ function print_content($content) {
 		//Undergraduate Programs
 		else if($type === 'undergrad')
 		{
-			print_header($title);
+			print_header($title, true, $filename);
 			
 			if(isset($section['pages']))
 			{
@@ -65,7 +65,7 @@ function print_content($content) {
 		//General Education
 		else if($type === 'gened')
 		{
-			print_header($title);
+			print_header($title, true, $filename);
 			
 			if(isset($section['pages']))
 			{
@@ -92,7 +92,7 @@ function print_content($content) {
 		//Graduate Studies
 		else if($type === 'grad')
 		{
-			print_header($title);
+			print_header($title, true, $filename);
 			
 			if(isset($section['pages'])) 
 			{
@@ -114,7 +114,7 @@ function print_content($content) {
 		//Credential
 		else if($type === 'credential')
 		{
-			print_header($title);
+			print_header($title, true, $filename);
 			
 			if(isset($section['pages']))
 			{
@@ -128,13 +128,13 @@ function print_content($content) {
 		{
 			$file_names[$index]['subpages'] = courses_of_study($section);
 			
-			print_header($title);
+			print_header($title, true, $filename);
 			print_footer();
 		}
 		//Policies
 		else if($type === 'policies')
 		{
-			print_header($title);
+			print_header($title, true, $filename);
 			
 			if(isset($section['categories']))
 			{
@@ -146,7 +146,7 @@ function print_content($content) {
 		//Faculty
 		else if($type === 'faculty')
 		{
-			print_header($title);
+			print_header($title, true, $filename);
 			
 			$file_names[$index]['sublinks'] = print_faculty();
 			
@@ -155,7 +155,7 @@ function print_content($content) {
 		//Emeriti
 		else if($type === 'emeriti')
 		{
-			print_header($title);
+			print_header($title, true, $filename);
 			
 			$file_names[$index]['sublinks'] = print_emeriti();
 			
@@ -164,7 +164,7 @@ function print_content($content) {
 		//Non Special Requests
 		else 
 		{
-			print_header($title);
+			print_header($title, true, $filename);
 			
 			if(isset($section['pages']))
 				$file_names[$index]['sublinks'] = print_pages($section['pages'], $filename);
@@ -189,7 +189,7 @@ function print_content($content) {
 	return $file_names;
 }
 
-function print_header($title, $h1 = true){ 
+function print_header($title, $h1 = true, $file = ''){ 
 echo '<?xml version="1.0" encoding="utf-8"?>'."\n";
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
@@ -202,7 +202,7 @@ echo '<?xml version="1.0" encoding="utf-8"?>'."\n";
 	</head>
 	<body>
 	<?php if($h1) : ?>
-		<h1><?php echo $title; ?></h1>
+		<h1 <?php if($file != '') echo 'id="'.$file.'"'; ?>><?php echo $title; ?></h1>
 	<?php endif;
 }
 
@@ -234,7 +234,7 @@ function print_pages($pages, $base_class = '') {
 				$content = $page->post_content;
 				$content = apply_filters('the_content', $content);
 				$content = clear_double_headings($content);
-				if(count($pages) > 1) {
+				if((count($pages) > 1)&&($page->post_name !== 'general-education')) {
 					$content = lower_headings($content, 2);
 					$sublinks[] = array('title' => $page->post_title, 'file' => $page->post_name);
 				}
@@ -246,9 +246,9 @@ function print_pages($pages, $base_class = '') {
 				
 				$class = $base_class.' '.$page->post_name;
 				
-				echo '<div id="'.$page->post_name.'" class="'.$class.' page">';
+				echo '<div class="'.$class.' page">';
 				if((count($pages) > 1)&&($page->post_name !== 'general-education'))
-					echo '<h2>'.$page->post_title.'</h2>';
+					echo '<h2 id="'.$page->post_name.'">'.$page->post_title.'</h2>';
 				echo $content;
 				echo '</div>';
 			}
