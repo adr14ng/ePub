@@ -45,11 +45,16 @@ function print_content($content) {
 		{
 			print_header($title, true, $filename);
 			
+			if(isset($section['admissionpol']) && $section['admissionpol'])
+			{
+				$file_names[$index]['sublinks'][] = undergrad_admission_policies();
+			}
+			
 			if(isset($section['pages']))
 			{
 				$file_names[$index]['sublinks'] = print_pages($section['pages'], $filename);
 			}
-				
+			
 			if(isset($section['policies']) && $section['policies'])
 			{
 				$file_names[$index]['sublinks'][] = undergrad_policies();
@@ -148,7 +153,7 @@ function print_content($content) {
 		{
 			print_header($title, true, $filename);
 			
-			$file_names[$index]['sublinks'] = print_faculty();
+			print_faculty();
 			
 			print_footer();
 		}
@@ -157,7 +162,16 @@ function print_content($content) {
 		{
 			print_header($title, true, $filename);
 			
-			$file_names[$index]['sublinks'] = print_emeriti();
+			print_emeriti();
+			
+			print_footer();
+		}
+		//Groups
+		else if(strpos($type, 'group') !== FALSE)
+		{
+			print_header($title, true, $filename);
+			
+			$file_names[$index]['sublinks'] = print_groups($sections['categories']);
 			
 			print_footer();
 		}
@@ -259,6 +273,45 @@ function print_pages($pages, $base_class = '') {
 	return $sublinks;
 }
 
+function print_groups($terms) { 
+	global $post;
+	?>
+	
+	<div class="groups">
+<?php 
+		foreach($terms as $id) {
+			$term = get_term($id, 'group_type');			
+			$query_groups = new WP_Query(array(
+				'post_type' => 'groups', 
+				'orderby' => 'title', 
+				'order' => 'ASC', 
+				'group_type' => $term->slug, 
+				'posts_per_page' => 1000,));
+								
+			if($query_groups->have_posts()) 
+			{
+				while($query_groups->have_posts())
+				{ 
+					$query_groups->the_post();
+					echo '<h2 id="'.$term->slug.'-'.$post->post_name.'">'.get_the_title().'</h2>';
+					
+					$content = get_the_content();
+					$content = apply_filters('the_content', $content);
+					$content = lower_headings($content, 2);
+					
+					echo $content;
+					
+					$sublinks[] = array('title' => $post->post_title, 'file' => $term->slug.'-'.$post->post_name);
+				}
+			}
+		}
+?>
+	</div>
+<?php
+
+	return $sublinks;
+}
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
  * Table of Contents
@@ -315,7 +368,16 @@ function print_faculty() {
 		'orderby' => 'title', 
 		'order' => 'ASC',
 		'post_type' => 'faculty',
-		'posts_per_page' => 10000,));
+		'posts_per_page' => 10000,
+		'tax_query' => array(
+			array(
+				'taxonomy' => 'department_shortname',
+				'field' => 'slug',
+				'terms' => 'emeriti',
+				'operator' => 'NOT IN',
+			),
+		),
+	));
 		
 		
 	if($query_faculty->have_posts()): ?>
@@ -324,18 +386,13 @@ function print_faculty() {
 			<?php while ($query_faculty->have_posts()) { 
 				$query_faculty->the_post();
 				
-				if( strpos(get_the_term_list(  $post->ID, 'department_shortname', '', ', '), 'Emeriti') === FALSE):
-					echo '<h2 id="'.$post->post_name.'">'.get_the_title().'</h2>';
-					the_content();
-					$sublinks[] = array('title' => $post->post_title, 'file' => $post->post_name);
-				endif;
+				echo '<h2 id="'.$post->post_name.'">'.get_the_title().'</h2>';
+				the_content();
 				
 			} ?>
 			
 		</div>
 	<?php endif;
-	
-	return $sublinks;
 }
 
 function print_emeriti() {
@@ -355,13 +412,9 @@ function print_emeriti() {
 				$query_faculty->the_post();
 				echo '<h2 id="'.$post->post_name.'">'.get_the_title().'</h2>';
 				the_content();
-				
-				$sublinks[] = array('title' => $post->post_title, 'file' => $post->post_name);
 			} ?>
 		</div>
 	<?php endif;
-	
-	return $sublinks;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -707,6 +760,33 @@ function undergrad_policies(){
 	<?php endif;
 	
 	return array('title' => 'Undergraduate Programs, Policies and Procedures', 'file' => 'undergrad-policies', 'sublinks' => $sublinks);
+}
+
+function undergrad_admission_policies(){
+	global $post;
+	
+	$query_policies = new WP_Query(array(
+		'meta_key' => 'pol_rank',
+		'orderby' => 'meta_value_num title', 
+		'order' => 'ASC',  
+		'policy_categories' => 'undergraduate-admission-requirements',
+		'post_type' => 'policies',
+		'posts_per_page' => 1000,));
+		
+	if($query_policies->have_posts()) : 
+	?>
+	<div class = "undergrad undergrad-admission-policies">
+		<h2 id="undergrad-admission-policies">Undergraduate Admission Requirements</h2>
+		<?php while($query_policies->have_posts()) : $query_policies->the_post(); ?>
+			<h3 id="<?php echo $post->post_name; ?>"><?php echo the_title(); ?></h3>
+			<?php echo the_content(); 
+			$sublinks[] = array('title' => $post->post_title, 'file' => $post->post_name);
+			?>
+		<?php endwhile; ?>
+	</div>
+	<?php endif;
+	
+	return array('title' => 'Undergraduate Admission Requirements', 'file' => 'undergrad-admission-policies', 'sublinks' => $sublinks);
 }
 
 function degree_list() {

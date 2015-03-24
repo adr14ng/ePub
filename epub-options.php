@@ -39,14 +39,14 @@
 	{
 		$order = get_option('epub_order');
 	?>
-		<div class="wrap">
+		<div class="wrap clearfix">
 			<h2>EPUB Creation</h2>
 			<form enctype="multipart/form-data" name="epub_options" action="<?php echo plugins_url().'/csun-epub/epub-process.php'; ?>" method="post" id="epub_options">
+			<div id="form-wrap" class="pull-left">
 				<?php wp_nonce_field('epub-creation'); ?>
 				<input type="hidden" id="referredby" name="referredby" value="<?php echo esc_url(wp_get_referer()); ?>" />
 				<input type="hidden" name="return" value="<?php echo admin_url('tools.php?page=epub-create'); ?>" />
 				<input type="hidden" name="action" value="epub-creation" />
-				<input type="submit" name="submit" value="Save" class="btn btn-clear">
 				<ul id="sortable">
 					<?php foreach($order as $item) : ?>
 						<?php if($item === "options"): ?>
@@ -65,15 +65,51 @@
 							<li class="ui-state-default"><?php $this->policies_input(); ?></li>
 						<?php elseif($item === "toc" || $item === "faculty" || $item === "emeriti"): ?>
 							<li class="ui-state-default"><?php $this->title_input($item); ?></li>
+						<?php elseif(strpos($item, 'group') !== FALSE) : ?>
+							<li class="ui-state-default"><?php $this->groups_input($item); ?></li>
 						<?php else: ?>
 							<li class="ui-state-default"><?php $lists[] = $this->page_inputs($item); ?></li>
 						<?php endif; ?>
 					<?php endforeach; ?>
 				</ul>
-				
-				<input type="submit" name="submit" value="Submit" class="btn btn-clear">
-				<input type="submit" name="submit" value="Save" class="btn btn-clear">
+			</div>
+			<div id="submit-box" class="left-section-box pull-left">
+				<section class="options">
+					<h3 class="options-title">Actions</h3>
+					<div id="submit-inner" class="options-inside">
+						<button type="submit" name="submit" value="submit" class="btn btn-clear">Create ePub</button>
+						<button type="submit" name="submit" value="save" class="btn btn-clear">Save Changes</button>
+						<button type="submit" name="submit" value="default" class="btn btn-clear">Restore Defaults</button>
+					</div>
+				</section>
+			</div>
 			</form>
+			<div id="add-more" class="left-section-box pull-left">
+				<section class="options">
+					<h3 class="options-title">Add More</h3>
+					<div class="option-controls">
+						<span id="add-more-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
+						<span id="add-more-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+					</div>
+					<div id="add-more-inner" class="options-inside">
+						<h4>As needed: </h4>
+						<button id="add-page" class="btn btn-clear" value=0>Pages</button>
+						<button id="add-group" class="btn btn-clear" value=0>Groups</button>
+						<h4>Only one: </h4>
+						<button class="btn btn-clear add-content" value="options">Options</button>
+						<button class="btn btn-clear add-content" value="cover">Cover</button>
+						<button class="btn btn-clear add-content" value="toc">Table of Contents</button>
+						<button class="btn btn-clear add-content" value="undergrad">Undergraduate Studies</button>
+						<button class="btn btn-clear add-content" value="gened">General Education</button>
+						<button class="btn btn-clear add-content" value="grad">Courses of Study</button>
+						<button class="btn btn-clear add-content" value="policies">Policies</button>
+						<button class="btn btn-clear add-content" value="faculty">Faculty</button>
+						<button class="btn btn-clear add-content" value="emeriti">Emeriti</button>
+						<h4>Note:</h4>
+						<p>When you first add an item, only the title field will be available. Save to choose other options.</p>
+					</div>
+				</section>
+			</div>
 		</div>
 		<script>
 			$j = jQuery.noConflict();
@@ -90,10 +126,15 @@
 	public function options_inputs()
 	{ 
 		$options = get_option('epub_general');
+		$type = 'curr-options';
 	?>
-		<section class="options">
+		<section id="<?php echo $type; ?>" class="options">
 			<h3 class="options-title">ePub Options</h3>
-			<div class="options-inside clearfix">
+			<div class="option-controls">
+				<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
+				<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+			</div>
+			<div id="<?php echo $type; ?>-inner" class="options-inside clearfix">
 				<p><label for="options-title"> 
 					<span>Title: </span>
 					<input id="options-title" type="text" name="options[title]" value="<?php echo $options['title']; ?>" />
@@ -126,10 +167,16 @@
 	public function cover_inputs()
 	{ 
 		$options = get_option('epub_cover');
+		$type = 'curr-cover';
 	?>
-		<section class="options">
+		<section id="<?php echo $type; ?>" class="options">
 			<h3 class="options-title">Cover</h3>
-			<div class="options-inside clearfix">
+			<div class="option-controls">
+				<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
+				<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+				<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+			</div>
+			<div id="<?php echo $type; ?>-inner" class="options-inside clearfix">
 				<p><label for="cover-title"> 
 					<span>Title: </span>
 					<input id="cover-title" type="text" name="content[cover][title]" value="<?php echo $options['title']; ?>" />
@@ -149,9 +196,14 @@
 		$title = $options['title'];
 		$pages = $options['pages'];
 	?>
-		<section class="options">
+		<section id="<?php echo $file; ?>" class="options">
 			<h3 class="options-title"><?php echo $title; ?></h3>
-			<div class="options-inside clearfix">
+			<div class="option-controls">
+				<span id="<?php echo $file; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
+				<span id="<?php echo $file; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+				<span id="<?php echo $file; ?>-close" class="option-close dashicons dashicons-no"></span>
+			</div>
+			<div id="<?php echo $file; ?>-inner" class="options-inside clearfix">
 				<p><label for="<?php echo $file; ?>-title"> 
 					<span>Title: </span>
 					<input id="<?php echo $file; ?>-title" type="text" name="content[<?php echo $file; ?>][title]" value="<?php echo $title; ?>" />
@@ -161,17 +213,16 @@
 					<span class="list-box-title">Available Pages: </span>
 					<ul id="chose-<?php echo $file; ?>-page" class="chosen list-box <?php echo $file; ?>-page" name="content[<?php echo $file; ?>][pages][]">
 					<?php
-						foreach($pages as $id)
-						{
+						if(!empty($pages)) : foreach($pages as $id) :
 							$page = get_post($id);
 							echo '<li class="list-option" id="'.$page->ID.'">'.$page->post_title.'</option></li>';
-						}
+						endforeach; endif; 
 					?>
 					</ul>
 					
 					<ul id="unchosen-<?php echo $file; ?>-page" class="list-box <?php echo $file; ?>-page">
 					<?php
-						$args = array('exclude' => $pages);
+						$args = array('exclude' => $pages, 'hierarchical' => 0,);
 						$other_pages = get_pages($args);
 						
 						foreach($other_pages as $page)
@@ -191,30 +242,39 @@
 	{ 
 		$options = get_option('epub_undergrad');
 		$df_pages = $options['pages'];
+		$type = 'curr-undergrad';
 	?>
-		<section class="options">
+		<section id="<?php echo $type; ?>" class="options">
 			<h3 class="options-title">Undergraduate Programs</h3>
-			<div class="options-inside clearfix">
+			<div class="option-controls">
+				<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
+				<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+				<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+			</div>
+			<div id="<?php echo $type; ?>-inner" class="options-inside clearfix">
 				<p><label for="undergrad-title"> 
 					<span>Title: </span>
 					<input id="undergrad-title" type="text" name="content[undergrad][title]" value="<?php echo $options['title']; ?>" />
+				</label></p>
+				<p><label for="undergrad-admissionpol"> 
+					<span>Undergraduate Admission Policies: </span>
+					<input id="undergrad-admissionpol" type="checkbox" name="content[undergrad][admissionpol]" <? if(isset($options['admissionpol'])) echo 'checked'; ?> />
 				</label></p>
 				<p><label for="undergrad-pages">
 					<span class="list-box-title">Chosen Pages: </span>
 					<span class="list-box-title">Available Pages: </span>
 					<ul id="chose-undergrad-page" class="chosen list-box undergrad-page" name="content[undergrad][pages][]">
 					<?php
-						foreach($df_pages as $id)
-						{
+						if(!empty($df_pages)) :  foreach($df_pages as $id) :
 							$page = get_post($id);
 							echo '<li class="list-option" id="'.$page->ID.'">'.$page->post_title.'</option></li>';
-						}
+						endforeach; endif;
 					?>
 					</ul>
 					
 					<ul id="unchosen-undergrad-page" class="list-box undergrad-page">
 					<?php
-						$args = array('exclude' => $df_pages);
+						$args = array('exclude' => $df_pages, 'hierarchical' => 0,);
 						$pages = get_pages($args);
 						
 						foreach($pages as $page)
@@ -226,7 +286,7 @@
 				</label></p>
 				<p><label for="undergrad-policies"> 
 					<span>Undergraduate Policies: </span>
-					<input id="undergrad-policies" type="checkbox" name="content[undergrad][policies]" <? if(isset($options['proglist'])) echo 'checked'; ?> />
+					<input id="undergrad-policies" type="checkbox" name="content[undergrad][policies]" <? if(isset($options['policies'])) echo 'checked'; ?> />
 				</label></p>
 				<p><label for="undergrad-proglist"> 
 					<span>List Programs: </span>
@@ -241,10 +301,16 @@
 	{ 
 		$options = get_option('epub_gened');
 		$df_pages = $options['pages'];
+		$type = 'curr-gened';
 	?>
-		<section class="options">
+		<section id="<?php echo $type; ?>" class="options">
 			<h3 class="options-title">General Education</h3>
-			<div class="options-inside clearfix">
+			<div class="option-controls">
+				<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
+				<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+				<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+			</div>
+			<div id="<?php echo $type; ?>-inner" class="options-inside clearfix">
 				<p><label for="ge-title"> 
 					<span>Title: </span>
 					<input id="ge-title" type="text" name="content[gened][title]" value="<?php echo $options['title']; ?>" />
@@ -254,17 +320,16 @@
 					<span class="list-box-title">Available Pages: </span>
 					<ul id="chose-gened-page" class="chosen list-box gened-page" name="content[gened][pages][]">
 					<?php
-						foreach($df_pages as $id)
-						{
+						if(!empty($df_pages)) :  foreach($df_pages as $id) :
 							$page = get_post($id);
 							echo '<li class="list-option" id="'.$page->ID.'">'.$page->post_title.'</option></li>';
-						}
+						endforeach; endif;
 					?>
 					</ul>
 					
 					<ul id="unchosen-gened-page" class="list-box gened-page">
 					<?php
-						$args = array('exclude' => $df_pages);
+						$args = array('exclude' => $df_pages, 'hierarchical' => 0,);
 						$pages = get_pages($args);
 						
 						foreach($pages as $page)
@@ -295,10 +360,16 @@
 	{ 
 		$options = get_option('epub_grad');
 		$df_pages = $options['pages'];
+		$type = 'curr-grad';
 	?>
-		<section class="options">
+		<section id="<?php echo $type; ?>" class="options">
 			<h3 class="options-title">Graduate Studies</h3>
-			<div class="options-inside clearfix">
+			<div class="option-controls">
+				<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
+				<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+				<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+			</div>
+			<div id="<?php echo $type; ?>-inner" class="options-inside clearfix">
 				<p><label for="grad-title"> 
 					<span>Title: </span>
 					<input id="grad-title" type="text" name="content[grad][title]" value="<?php echo $options['title']; ?>" />
@@ -308,17 +379,16 @@
 					<span class="list-box-title">Available Pages: </span>
 					<ul id="chose-grad-page" class="chosen list-box grad-page" name="content[grad][pages][]">
 					<?php
-						foreach($df_pages as $id)
-						{
+						if(!empty($df_pages)) :  foreach($df_pages as $id) :
 							$page = get_post($id);
 							echo '<li class="list-option" id="'.$page->ID.'">'.$page->post_title.'</option></li>';
-						}
+						endforeach; endif;
 					?>
 					</ul>
 					
 					<ul id="unchosen-grad-page" class="list-box grad-page">
 					<?php
-						$args = array('exclude' => $df_pages);
+						$args = array('exclude' => $df_pages, 'hierarchical' => 0,);
 						$pages = get_pages($args);
 						
 						foreach($pages as $page)
@@ -345,10 +415,16 @@
 	{ 
 		$options = get_option('epub_courses');
 		$depts = $options['categories'];
+		$type = 'curr-courses';
 	?>
-		<section class="options">
+		<section id="<?php echo $type; ?>" class="options">
 			<h3 class="options-title">Courses of Study</h3>
-			<div class="options-inside clearfix">
+			<div class="option-controls">
+				<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
+				<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+				<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+			</div>
+			<div id="<?php echo $type; ?>-inner" class="options-inside clearfix">
 				<p><label for="courses-title"> 
 					<span>Title: </span>
 					<input id="courses-title" type="text" name="content[courses][title]" value="<?php echo $options['title']; ?>" />
@@ -366,13 +442,12 @@
 					<span class="list-box-title">Available Departments: </span>
 					<ul id="chose-dept-cat" class="chosen list-box dept-cats" name="content[courses][categories][]">
 					<?php
-						foreach($depts as $dept)
-						{
+						if(!empty($depts)) :  foreach($depts as $dept) :
 							$term = get_term_by('slug', $dept, 'department_shortname');
 							echo '<li class="list-option" id="'.$term->slug.'">'.$term->description.'</option></li>';
 							
 							$exclude[] = $term->term_id;
-						}
+						endforeach; endif;
 					?>
 					</ul>
 					
@@ -397,11 +472,17 @@
 	{ 
 		$options = get_option('epub_policies');
 		$cats = $options['categories'];
+		$type = 'curr-policies';
 		
 	?>
-		<section class="options">
+		<section id="<?php echo $type; ?>" class="options">
 			<h3 class="options-title">Policies</h3>
-			<div class="options-inside clearfix">
+			<div class="option-controls">
+				<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
+				<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+				<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+			</div>
+			<div id="<?php echo $type; ?>-inner" class="options-inside clearfix">
 				<p><label for="policies-title">
 					<span>Title: </span>
 					<input id="policies-title" type="text" name="content[policies][title]" value="<?php echo $options['title']; ?>" />
@@ -411,17 +492,16 @@
 					<span class="list-box-title">Available Policy Categories: </span>
 					<ul id="chose-pol-cat" class="chosen list-box pol-cats" name="content[policies][categories][]">
 					<?php
-						foreach($cats as $cat)
-						{
+						if(!empty($cats)) :  foreach($cats as $cat) :
 							$term = get_term($cat, 'policy_categories');
 							echo '<li class="list-option" id="'.$term->term_id.'">'.$term->name.'</option></li>';
-						}
+						endforeach; endif;
 					?>
 					</ul>
 					
 					<ul id="unchosen-pol-cat" class="list-box pol-cats">
 					<?php
-						$args = array('exclude' => $cats);
+						$args = array('exclude' => $cats, 'orderby' => 'title', 'order' => 'ASC',);
 						$terms = get_terms('policy_categories', $args);
 						
 						foreach($terms as $term)
@@ -442,12 +522,54 @@
 		$options = get_option('epub_'.$type);
 		$title = $options['title'];
 	?>
-		<section class="options">
+		<section id="<?php echo $type; ?>" class="options">
 			<h3 class="options-title"><?php echo $title; ?></h3>
-			<div class="options-inside clearfix">
+			<div class="option-controls">
+				<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
+				<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+				<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+			</div>
+			<div id="<?php echo $type; ?>-inner" class="options-inside clearfix">
 				<p><label for="<?php echo $type; ?>-title"> 
 					<span>Title: </span>
 					<input id="<?php echo $type; ?>-title" type="text" name="content[<?php echo $type; ?>][title]" value="<?php echo $title; ?>" />
+				</label></p>
+			</div>
+		</section>
+<?php
+	}
+	
+	public function groups_input($type)
+	{ 
+		$options = get_option('epub_'.$type);
+		$cats = $options['categories'];
+		$group = $cats[0];
+		
+	?>
+		<section id="<?php echo $type; ?>" class="options">
+			<h3 class="options-title">Groups - <?php echo $options['title']; ?></h3>
+			<div class="option-controls">
+				<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
+				<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+				<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+			</div>
+			<div id="<?php echo $type; ?>-inner" class="options-inside clearfix">
+				<p><label for="<?php echo $type; ?>-title">
+					<span>Title: </span>
+					<input id="<?php echo $type; ?>-title" type="text" name="content[<?php echo $type; ?>][title]" value="<?php echo $options['title']; ?>" />
+				</label></p>
+				<p><label for="<?php echo $type; ?>-cat">
+					<span>Group Category: </span>
+					<ul id="<?php echo $type; ?>-cat" name="content[<?php echo $type; ?>][categories][]">
+					<?php $terms = get_terms('group_type');
+						if(!empty($terms)) : foreach($terms as $term) : ?>
+							<li>
+								<input type="radio" name="content[<?php echo $type; ?>][categories][]" value="<?php echo $term->term_id; ?>" <?php if($group == $term->term_id) echo 'checked'; ?>>
+								<?php echo $term->name; ?>
+							</li>
+						<?php endforeach; endif; ?>
+					</ul>
+					
 				</label></p>
 			</div>
 		</section>

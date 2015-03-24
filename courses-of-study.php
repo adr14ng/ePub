@@ -255,6 +255,19 @@ function print_program() {
 
 		echo '</h2>';
 		
+		$funding = get_field('fund_source');
+		if($funding === 'self')
+		{
+			echo '<em>Offered through the Tseng College.</em>';
+		}
+		elseif($funding === 'both')
+		{
+			$depts = get_the_terms($post->ID, 'department_shortname');
+			$dept = array_pop($depts);
+			$college = get_term_by('id', (int)$dept->parent, 'department_shortname');
+			echo '<em>This program can be entered through '.$college->description.' or through the The Tseng College.</em>'
+		}
+		
 		echo '<h3>Overview</h3>';
 		the_content();
 		
@@ -429,8 +442,23 @@ function print_dept_faculty($dept) {
 		'orderby' => 'title', 
 		'order' => 'ASC',
 		'post_type' => 'faculty',
-		'department_shortname' => $dept,		//root out emeriti
-		'posts_per_page' => 1000,));
+		'department_shortname' => ,		//root out emeriti
+		'posts_per_page' => 1000,
+		'tax_query' => array(
+			'relation' => 'AND',
+			array(
+				'taxonomy' => 'department_shortname',
+				'field' => 'slug',
+				'terms' => 'emeriti',
+				'operator' => 'NOT IN',
+			),
+			array(
+				'taxonomy' => 'department_shortname',
+				'field' => 'slug',
+				'terms' => $dept,
+			),
+		),
+	));
 		
 	$post_counter = 0;	
 	if($query_faculty->have_posts()): ?>
@@ -441,16 +469,14 @@ function print_dept_faculty($dept) {
 				$query_faculty->the_post();
 				$post_counter++;
 				
-				if( strpos(get_the_term_list(  $post->ID, 'department_shortname', '', ', '), 'Emeriti') === FALSE):
-					$name = get_the_title();
-					$names = explode(", ", $name);
-					$name = $names[1]." ".$names[0];
+				$name = get_the_title();
+				$names = explode(", ", $name);
+				$name = $names[1]." ".$names[0];
 					
-					echo $name;
+				echo $name;
 					
-					if( $post_counter < $query_faculty->post_count ) 
-						echo ', ';
-				endif;
+				if( $post_counter < $query_faculty->post_count ) 
+					echo ', ';
 			} ?>
 			
 		</div>

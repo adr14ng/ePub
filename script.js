@@ -42,4 +42,111 @@ $j( document ).ready(function() {
 		return true;
 	});
 	
+	$j('.add-content').click(function() {
+		var type = $j(this).attr("value");
+		var content = '<li class="ui-state-default">'+
+						'<section id="'+type+'" class="options">' +
+							'<h3 class="options-title">'+type+'</h3>' +
+							'<div class="option-controls">' +
+								'<span id="'+type+'-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>' +
+								'<span id="'+type+'-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>' +
+								'<span id="'+type+'-close" class="option-close dashicons dashicons-no"></span>' +
+							'</div>' +
+							'<div id="'+type+'-inner" class="options-inside clearfix">' +
+								'<p><label for="'+type+'-title">'  +
+									'<span>Title: </span>' +
+									'<input id="'+type+'-title" type="text" name="content['+type+'][title]" value="" />' +
+								'</label></p>' +
+							'</div>' +
+						'</section>' +
+					  '</li>';
+		$j('#sortable').prepend(content);
+	});
+	
+	$j('#add-page').click(function() {
+		var val = $j(this).val();
+		var type = "new-page-"+val;
+		val++;
+		$j(this).val(val)
+		var content = '<li class="ui-state-default">'+
+						'<section id="'+type+'" class="options">' +
+							'<h3 class="options-title">New Pages</h3>' +
+							'<div class="option-controls">' +
+								'<span id="'+type+'-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>' +
+								'<span id="'+type+'-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>' +
+								'<span id="'+type+'-close" class="option-close dashicons dashicons-no"></span>' +
+							'</div>' +
+							'<div id="'+type+'-inner" class="options-inside clearfix">' +
+								'<p><label for="'+type+'-title">'  +
+									'<span>Title: </span>' +
+									'<input id="'+type+'-title" type="text" name="content['+type+'][title]" value="" />' +
+								'</label></p>' +
+							'</div>' +
+						'</section>' +
+					  '</li>';
+		$j('#sortable').prepend(content);
+	});
+	
+	$j('#add-group').click(function() {
+		var val = $j(this).val();
+		var type = "new-group-"+val;
+		val++;
+		$j(this).val(val)
+		var content = '<li class="ui-state-default">'+
+						'<section id="'+type+'" class="options">' +
+							'<h3 class="options-title">New Groups</h3>' +
+							'<div class="option-controls">' +
+								'<span id="'+type+'-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>' +
+								'<span id="'+type+'-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>' +
+								'<span id="'+type+'-close" class="option-close dashicons dashicons-no"></span>' +
+							'</div>' +
+							'<div id="'+type+'-inner" class="options-inside clearfix">' +
+								'<p><label for="'+type+'-title">'  +
+									'<span>Title: </span>' +
+									'<input id="'+type+'-title" type="text" name="content['+type+'][title]" value="" />' +
+								'</label></p>' +
+							'</div>' +
+						'</section>' +
+					  '</li>';
+		$j('#sortable').prepend(content);
+	});
+	
+	$j("#sortable").delegate('.option-hide', "click", function() {
+		var id = $j(this).attr('id');
+		console.log("close");
+		$j(this).hide();
+		id = '#'+id.replace("mini", "max");
+		$j(id).show();
+		id = id.replace("max", "inner");
+		$j(id).hide("slide", {direction:"up"}, 200);
+	});
+	
+	$j("#sortable").delegate('.option-show', "click", function() {
+		var id = $j(this).attr('id');
+		$j(this).hide();
+		id = '#'+id.replace("max", "mini");
+		$j(id).show();
+		id = id.replace("mini", "inner");
+		$j(id).show("slide", {direction:"up"}, 200);
+	});
+	
+	$j("#sortable").delegate('.option-close', "click", function() {
+		var id = $j(this).attr('id');
+		console.log("delete");
+		id = '#'+id.replace("-close", "");
+		$j(id).remove();
+	});
+	
+	$j("#add-more-mini").click(function() {
+		$j(this).hide();
+		$j("#add-more-max").show();
+		$j("#add-more-inner").hide("slide", {direction:"up"}, 200);
+	});
+	
+	$j("#add-more-max").click(function() {
+		$j(this).hide();
+		$j("#add-more-mini").show();
+		$j("#add-more-inner").show("slide", {direction:"up"}, 200);
+	});
+	
   });
