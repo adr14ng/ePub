@@ -4,7 +4,8 @@
 	margin: 10px;
 }
 
-.options-inside {
+.options-inside,
+.controls-inside  {
 	background: #fff;
 	border-top: 1px solid #666;
 	padding: 10px;

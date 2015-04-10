@@ -73,10 +73,13 @@
 					<?php endforeach; ?>
 				</ul>
 			</div>
-			<div id="submit-box" class="left-section-box pull-left">
+			<div id="sumbit-box" class="left-section-box pull-left">
 				<section class="options">
 					<h3 class="options-title">Actions</h3>
-					<div id="submit-inner" class="options-inside">
+					<div id="submit-inner" class="controls-inside">
+						<span id="collapse-all" class="btn btn-clear">Collapse All</span>
+						<span id="expand-all" class="btn btn-clear">Expand All</span>
+						<br />
 						<button type="submit" name="submit" value="submit" class="btn btn-clear">Create ePub</button>
 						<button type="submit" name="submit" value="save" class="btn btn-clear">Save Changes</button>
 						<button type="submit" name="submit" value="default" class="btn btn-clear">Restore Defaults</button>
@@ -88,10 +91,10 @@
 				<section class="options">
 					<h3 class="options-title">Add More</h3>
 					<div class="option-controls">
-						<span id="add-more-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
-						<span id="add-more-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+						<span id="add-more-mini" class="dashicons dashicons-arrow-up-alt2"></span>
+						<span id="add-more-max" class="dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
 					</div>
-					<div id="add-more-inner" class="options-inside">
+					<div id="add-more-inner" class="controls-inside">
 						<h4>As needed: </h4>
 						<button id="add-page" class="btn btn-clear" value=0>Pages</button>
 						<button id="add-group" class="btn btn-clear" value=0>Groups</button>
@@ -129,10 +132,12 @@
 		$type = 'curr-options';
 	?>
 		<section id="<?php echo $type; ?>" class="options">
-			<h3 class="options-title">ePub Options</h3>
-			<div class="option-controls">
-				<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
-				<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+			<div class="options-drag-handle">
+				<h3 class="options-title">ePub Options</h3>
+				<div class="option-controls">
+					<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
+					<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+				</div>
 			</div>
 			<div id="<?php echo $type; ?>-inner" class="options-inside clearfix">
 				<p><label for="options-title"> 
@@ -170,11 +175,13 @@
 		$type = 'curr-cover';
 	?>
 		<section id="<?php echo $type; ?>" class="options">
-			<h3 class="options-title">Cover</h3>
-			<div class="option-controls">
-				<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
-				<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
-				<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+			<div class="options-drag-handle">
+				<h3 class="options-title">Cover</h3>
+				<div class="option-controls">
+					<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
+					<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+					<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+				</div>
 			</div>
 			<div id="<?php echo $type; ?>-inner" class="options-inside clearfix">
 				<p><label for="cover-title"> 
@@ -197,11 +204,13 @@
 		$pages = $options['pages'];
 	?>
 		<section id="<?php echo $file; ?>" class="options">
-			<h3 class="options-title"><?php echo $title; ?></h3>
-			<div class="option-controls">
-				<span id="<?php echo $file; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
-				<span id="<?php echo $file; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
-				<span id="<?php echo $file; ?>-close" class="option-close dashicons dashicons-no"></span>
+			<div class="options-drag-handle">
+				<h3 class="options-title"><?php echo $title; ?></h3>
+				<div class="option-controls">
+					<span id="<?php echo $file; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
+					<span id="<?php echo $file; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+					<span id="<?php echo $file; ?>-close" class="option-close dashicons dashicons-no"></span>
+				</div>
 			</div>
 			<div id="<?php echo $file; ?>-inner" class="options-inside clearfix">
 				<p><label for="<?php echo $file; ?>-title"> 
@@ -245,11 +254,13 @@
 		$type = 'curr-undergrad';
 	?>
 		<section id="<?php echo $type; ?>" class="options">
-			<h3 class="options-title">Undergraduate Programs</h3>
-			<div class="option-controls">
-				<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
-				<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
-				<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+			<div class="options-drag-handle">
+				<h3 class="options-title">Undergraduate Programs</h3>
+				<div class="option-controls">
+					<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
+					<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+					<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+				</div>
 			</div>
 			<div id="<?php echo $type; ?>-inner" class="options-inside clearfix">
 				<p><label for="undergrad-title"> 
@@ -304,11 +315,13 @@
 		$type = 'curr-gened';
 	?>
 		<section id="<?php echo $type; ?>" class="options">
-			<h3 class="options-title">General Education</h3>
-			<div class="option-controls">
-				<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
-				<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
-				<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+			<div class="options-drag-handle">
+				<h3 class="options-title">General Education</h3>
+				<div class="option-controls">
+					<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
+					<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+					<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+				</div>
 			</div>
 			<div id="<?php echo $type; ?>-inner" class="options-inside clearfix">
 				<p><label for="ge-title"> 
@@ -363,11 +376,13 @@
 		$type = 'curr-grad';
 	?>
 		<section id="<?php echo $type; ?>" class="options">
-			<h3 class="options-title">Graduate Studies</h3>
-			<div class="option-controls">
-				<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
-				<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
-				<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+			<div class="options-drag-handle">
+				<h3 class="options-title">Graduate Studies</h3>
+				<div class="option-controls">
+					<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
+					<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+					<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+				</div>
 			</div>
 			<div id="<?php echo $type; ?>-inner" class="options-inside clearfix">
 				<p><label for="grad-title"> 
@@ -418,11 +433,13 @@
 		$type = 'curr-courses';
 	?>
 		<section id="<?php echo $type; ?>" class="options">
-			<h3 class="options-title">Courses of Study</h3>
-			<div class="option-controls">
-				<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
-				<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
-				<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+			<div class="options-drag-handle">
+				<h3 class="options-title">Courses of Study</h3>
+				<div class="option-controls">
+					<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
+					<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+					<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+				</div>
 			</div>
 			<div id="<?php echo $type; ?>-inner" class="options-inside clearfix">
 				<p><label for="courses-title"> 
@@ -476,11 +493,13 @@
 		
 	?>
 		<section id="<?php echo $type; ?>" class="options">
-			<h3 class="options-title">Policies</h3>
-			<div class="option-controls">
-				<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
-				<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
-				<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+			<div class="options-drag-handle">
+				<h3 class="options-title">Policies</h3>
+				<div class="option-controls">
+					<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
+					<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+					<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+				</div>
 			</div>
 			<div id="<?php echo $type; ?>-inner" class="options-inside clearfix">
 				<p><label for="policies-title">
@@ -523,11 +542,13 @@
 		$title = $options['title'];
 	?>
 		<section id="<?php echo $type; ?>" class="options">
-			<h3 class="options-title"><?php echo $title; ?></h3>
-			<div class="option-controls">
-				<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
-				<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
-				<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+			<div class="options-drag-handle">
+				<h3 class="options-title"><?php echo $title; ?></h3>
+				<div class="option-controls">
+					<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
+					<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+					<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+				</div>
 			</div>
 			<div id="<?php echo $type; ?>-inner" class="options-inside clearfix">
 				<p><label for="<?php echo $type; ?>-title"> 
@@ -547,11 +568,13 @@
 		
 	?>
 		<section id="<?php echo $type; ?>" class="options">
-			<h3 class="options-title">Groups - <?php echo $options['title']; ?></h3>
-			<div class="option-controls">
-				<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
-				<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
-				<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+			<div class="options-drag-handle">
+				<h3 class="options-title">Groups - <?php echo $options['title']; ?></h3>
+				<div class="option-controls">
+					<span id="<?php echo $type; ?>-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>
+					<span id="<?php echo $type; ?>-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>
+					<span id="<?php echo $type; ?>-close" class="option-close dashicons dashicons-no"></span>
+				</div>
 			</div>
 			<div id="<?php echo $type; ?>-inner" class="options-inside clearfix">
 				<p><label for="<?php echo $type; ?>-title">

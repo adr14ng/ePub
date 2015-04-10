@@ -52,7 +52,8 @@ function print_content($content) {
 			
 			if(isset($section['pages']))
 			{
-				$file_names[$index]['sublinks'] = print_pages($section['pages'], $filename);
+				$new_links = print_pages($section['pages'], $filename);
+				$file_names[$index]['sublinks'] = array_merge($file_names[$index]['sublinks'], $new_links); 
 			}
 			
 			if(isset($section['policies']) && $section['policies'])
@@ -171,7 +172,7 @@ function print_content($content) {
 		{
 			print_header($title, true, $filename);
 			
-			$file_names[$index]['sublinks'] = print_groups($sections['categories']);
+			$file_names[$index]['sublinks'] = print_groups($section['categories']);
 			
 			print_footer();
 		}
@@ -294,6 +295,12 @@ function print_groups($terms) {
 				{ 
 					$query_groups->the_post();
 					echo '<h2 id="'.$term->slug.'-'.$post->post_name.'">'.get_the_title().'</h2>';
+					
+					$contact = apply_filters('the_content', get_field('contact', $post->ID));
+					if(!empty($contact))
+					{
+						echo "<em><strong>".$contact."</strong></em>";
+					}
 					
 					$content = get_the_content();
 					$content = apply_filters('the_content', $content);

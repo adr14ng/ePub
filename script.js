@@ -2,7 +2,7 @@ $j = jQuery.noConflict();
 
 $j( document ).ready(function() {
     $j( "#sortable" ).sortable();
-	$j( "#sortable" ).sortable("option", "handle", ".options-title");
+	$j( "#sortable" ).sortable("option", "handle", ".options-drag-handle");
     $j( "#sortable" ).disableSelection();
 	
 	$j("#chose-pol-cat, #unchosen-pol-cat" ).sortable({
@@ -46,11 +46,13 @@ $j( document ).ready(function() {
 		var type = $j(this).attr("value");
 		var content = '<li class="ui-state-default">'+
 						'<section id="'+type+'" class="options">' +
-							'<h3 class="options-title">'+type+'</h3>' +
-							'<div class="option-controls">' +
-								'<span id="'+type+'-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>' +
-								'<span id="'+type+'-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>' +
-								'<span id="'+type+'-close" class="option-close dashicons dashicons-no"></span>' +
+							'<div class="options-drag-handle">' +
+								'<h3 class="options-title">'+type+'</h3>' +
+								'<div class="option-controls">' +
+									'<span id="'+type+'-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>' +
+									'<span id="'+type+'-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>' +
+									'<span id="'+type+'-close" class="option-close dashicons dashicons-no"></span>' +
+								'</div>' +
 							'</div>' +
 							'<div id="'+type+'-inner" class="options-inside clearfix">' +
 								'<p><label for="'+type+'-title">'  +
@@ -70,11 +72,13 @@ $j( document ).ready(function() {
 		$j(this).val(val)
 		var content = '<li class="ui-state-default">'+
 						'<section id="'+type+'" class="options">' +
-							'<h3 class="options-title">New Pages</h3>' +
-							'<div class="option-controls">' +
-								'<span id="'+type+'-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>' +
-								'<span id="'+type+'-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>' +
-								'<span id="'+type+'-close" class="option-close dashicons dashicons-no"></span>' +
+							'<div class="options-drag-handle">' +
+								'<h3 class="options-title">New Pages</h3>' +
+								'<div class="option-controls">' +
+									'<span id="'+type+'-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>' +
+									'<span id="'+type+'-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>' +
+									'<span id="'+type+'-close" class="option-close dashicons dashicons-no"></span>' +
+								'</div>' +
 							'</div>' +
 							'<div id="'+type+'-inner" class="options-inside clearfix">' +
 								'<p><label for="'+type+'-title">'  +
@@ -94,11 +98,13 @@ $j( document ).ready(function() {
 		$j(this).val(val)
 		var content = '<li class="ui-state-default">'+
 						'<section id="'+type+'" class="options">' +
-							'<h3 class="options-title">New Groups</h3>' +
-							'<div class="option-controls">' +
-								'<span id="'+type+'-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>' +
-								'<span id="'+type+'-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>' +
-								'<span id="'+type+'-close" class="option-close dashicons dashicons-no"></span>' +
+							'<div class="options-drag-handle">' +
+								'<h3 class="options-title">New Groups</h3>' +
+								'<div class="option-controls">' +
+									'<span id="'+type+'-mini" class="option-hide dashicons dashicons-arrow-up-alt2"></span>' +
+									'<span id="'+type+'-max" class="option-show dashicons dashicons-arrow-down-alt2" style="display: none;"></span>' +
+									'<span id="'+type+'-close" class="option-close dashicons dashicons-no"></span>' +
+								'</div>' +
 							'</div>' +
 							'<div id="'+type+'-inner" class="options-inside clearfix">' +
 								'<p><label for="'+type+'-title">'  +
@@ -147,6 +153,18 @@ $j( document ).ready(function() {
 		$j(this).hide();
 		$j("#add-more-mini").show();
 		$j("#add-more-inner").show("slide", {direction:"up"}, 200);
+	});
+	
+	$j("#collapse-all").click(function() {
+		$j(".option-hide").hide();
+		$j(".option-show").show();
+		$j(".options-inside").hide("slide", {direction:"up"}, 200);
+	});
+	
+	$j("#expand-all").click(function() {
+		$j(".option-show").hide();
+		$j(".option-hide").show();
+		$j(".options-inside").show("slide", {direction:"up"}, 200);
 	});
 	
   });

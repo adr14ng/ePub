@@ -29,7 +29,7 @@ if(isset($_POST['action']) && $_POST['action'] == 'epub-creation')
 		epub_save_options();
 		
 		$options = $_POST['options'];
-		$dir = sanitize_file_name($options['title']);
+		$dir = sanitize_file_name($options['bookid']);
 		$name = $dir.'.epub';
 		$zip_file = $book_dir.'/'.$name;
 		$book_dir .= '/'.$dir;

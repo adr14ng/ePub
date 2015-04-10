@@ -183,7 +183,7 @@ function get_course_of_study($deptterm) {
 		print_program_list($dept);
 		print_department($dept);
 		$sublinks = print_programs($dept);
-		$sublinks[] = print_courses($dept); 
+		$sublinks[] = print_courses($deptterm); 
 ?>
 	</div>
 <?php 
@@ -192,7 +192,10 @@ function get_course_of_study($deptterm) {
 
 
 
-function print_courses($dept) {
+function print_courses($deptterm) {
+	$dept = $deptterm->slug;
+	$title = $deptterm->description;
+	
 	$query_course = new WP_Query(array(
 		'post_type' => 'courses', 
 		'orderby' => 'title', 
@@ -210,7 +213,7 @@ function print_courses($dept) {
 		endwhile; ?>
 		</div>
 	<?php 
-		return array('title' => 'Course List', 'file' => 'course-'.$dept);
+		return array('title' => $title.' Course List', 'file' => 'course-'.$dept);
 	endif;
 }
 
@@ -265,7 +268,7 @@ function print_program() {
 			$depts = get_the_terms($post->ID, 'department_shortname');
 			$dept = array_pop($depts);
 			$college = get_term_by('id', (int)$dept->parent, 'department_shortname');
-			echo '<em>This program can be entered through '.$college->description.' or through the The Tseng College.</em>'
+			echo '<em>This program can be entered through '.$college->description.' or through the The Tseng College.</em>';
 		}
 		
 		echo '<h3>Overview</h3>';
@@ -442,7 +445,6 @@ function print_dept_faculty($dept) {
 		'orderby' => 'title', 
 		'order' => 'ASC',
 		'post_type' => 'faculty',
-		'department_shortname' => ,		//root out emeriti
 		'posts_per_page' => 1000,
 		'tax_query' => array(
 			'relation' => 'AND',
