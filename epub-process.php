@@ -489,6 +489,7 @@ function default_options()
 			(
 				0 => 186,
 			),
+			'policies' => 'on',
 			"proglist" => "on",
 			"certlist" => "on",
 		),

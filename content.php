@@ -104,6 +104,11 @@ function print_content($content) {
 			{
 				$file_names[$index]['sublinks'] = print_graduate_page($section['pages']);
 			}
+			
+			if(isset($section['policies']) && $section['policies'])
+			{
+				$file_names[$index]['sublinks'][] = grad_policies();
+			}
 				
 			if(isset($section['proglist']) && $section['proglist'])
 			{
@@ -489,16 +494,6 @@ function print_policies($terms) {
 		$content = apply_filters('the_content', $content);
 		$content = add_ids($content);
 		$sublinks = get_sublinks($content);
-		list($policy_content, $policy_links) = grad_policies();
-		
-		foreach($sublinks as $key => $link) {
-			if(isset($link['file']) && $link['file'] === 'grad-policies') {
-				$sublinks[$key]['sublinks'] = $policy_links;
-				break;
-			}
-		}
-		
-		$content = preg_replace('/(<div id="policies"[^>]*>)([\s\S]*?)(<\/div>)/i', '$1'.$policy_content.'$3', $content);
 				
 		$class = 'graduate-studies '.$page->post_name;
 				
@@ -511,30 +506,32 @@ function print_policies($terms) {
 	return $sublinks;
 }
  
- function grad_policies(){
+
+function grad_policies(){
 	global $post;
 	
 	$query_policies = new WP_Query(array(
 		'meta_key' => 'pol_rank',
 		'orderby' => 'meta_value_num title', 
-		'order' => 'ASC', 
-		'policy_tags' => 'graduate',
+		'order' => 'ASC',  
+		'policy_categories' => 'graduate-policies',
 		'post_type' => 'policies',
 		'posts_per_page' => 1000,));
-	
-	$policy_content = '';
-	if($query_policies->have_posts()) : 
-		while($query_policies->have_posts()) : $query_policies->the_post(); 
 		
-			$policy_content .= '<h3 id="'.$post->post_name.'">'.get_the_title().'</h3>';
-			$policy_content .= apply_filters('the_content', get_the_content()); 
-			
+	if($query_policies->have_posts()) : 
+	?>
+	<div class = "grad-studies grad-policies">
+		<h2 id="grad-policies">Graduate Studies Policies and Procedures</h2>
+		<?php while($query_policies->have_posts()) : $query_policies->the_post(); ?>
+			<h3 id="<?php echo $post->post_name; ?>"><?php echo the_title(); ?></h3>
+			<?php echo the_content(); 
 			$sublinks[] = array('title' => $post->post_title, 'file' => $post->post_name);
-			
-		endwhile;
-	endif;
+			?>
+		<?php endwhile; ?>
+	</div>
+	<?php endif;
 	
-	return array($policy_content, $sublinks);
+	return array('title' => 'Graduate Studies Policies and Procedures', 'file' => 'grad-policies', 'sublinks' => $sublinks);
 }
  
 function print_grad_program_list() { 

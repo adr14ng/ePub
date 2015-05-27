@@ -88,6 +88,7 @@
 		$grad = array(
 			'title' => 'Research and Graduate Studies',
 			'pages' => array(186),
+			'policies' => 'on',
 			'proglist' => true,
 			'certlist' => 28943,
 		);

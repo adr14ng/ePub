@@ -413,6 +413,10 @@
 					?>
 					</ul>
 				</label></p>
+				<p><label for="grad-pol"> 
+					<span>List Policies: </span>
+					<input id="grad-pol" type="checkbox" name="content[grad][policies]" <? if(isset($options['policies'])) echo 'checked'; ?> />
+				</label></p>
 				<p><label for="grad-prog"> 
 					<span>List Programs: </span>
 					<input id="grad-prog" type="checkbox" name="content[grad][proglist]" <? if(isset($options['proglist'])) echo 'checked'; ?> />
